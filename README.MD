@@ -7,13 +7,13 @@
 ### 模块导入
 
 ```go
-import simpleReuqest2 "go-simple/simpleRequest/v2"
+import  "github.com/dorlolo/simpleRequest"
 ```
 
 ### 实例化
 
 ```go
-var r = simpleReuqest2.NewRequest()
+var r = simpleRequest.NewRequest()
 ```
 
 ### 添加请求头
