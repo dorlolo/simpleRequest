@@ -1,6 +1,9 @@
-# simpleRequest -- 基于http库封装的request请求方案
-## 特点
-适用于基于http协议的iot数据采集。 功能简介、易于上手。只要了解postman工具，就能使用这个库。极大地减少了代码量。
+# simpleRequest -- 
+## 说明
+[simpleRequest](www.github.com/dorlolo/simpleRequest) 是基于golang原生http库的封装，适合用来对第三方接口进行快速地对接和开发。
+它具备以下特点：
+- 相对于其它请求库，更易于理解和使用。极大减少了开发过程中的代码量和资料查询时间。
+- 适合对接一些未遵循restful规范的接口。
 
 ## 如何使用?
 
@@ -39,15 +42,16 @@ r.Headers().Set("token", "d+jfdji*D%1=").Set("Content-Type", "application/json")
 ```
 #### 使用预设的key
 ```go
-r.Headers().SetConentLength("2")
-//r.Headers().Set("Content-Length", "2")
-
-r.Headers().SetConentEncoding("gzip, deflate, br")
-//r.Headers().Set("Content-Encoding", "gzip, deflate, br")
+r.Headers().SetConentType("application/json")
+//r.Headers().Set("Content-Type", "application/json")
 
 r.Headers().SetUserAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.835.163 Safari/535.1"")
 //r.Headers().Set("User-Agent",Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.835.163 Safari/535.1")
+
+r.Headers().SetConentEncoding("gzip, deflate, br")
+//r.Headers().Set("Content-Encoding", "gzip, deflate, br")
 ```
+
 #### 使用预设的key-value
 ```go
 //随机user-agent
@@ -160,12 +164,12 @@ fmt.Println(res)
 
 ### 获取上下文
 请注意，需要完成请求后才能获得上下文数据！
-#### 获取请求的上下文
+#### 获取请求的上下文对象
 ```go
 requestContext:=r.Request
 ```
 
-#### 获取返回的上下文
+#### 获取返回的上下文对象
 ```go
 responseContext:=r.Response
 ```

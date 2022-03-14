@@ -86,16 +86,18 @@ func (s *HeadersConf) Add(header, value string) *HeadersConf {
 
 //-------------------------------------------------------------
 // base Key settings
+
+//SetUserAgent
 func (s *HeadersConf) SetUserAgent(value string) *HeadersConf {
 	s.simpleReq.headers.Set(hdrUserAgentKey, value)
 	return s
 }
 
-//set ContentType--------------------------------------------------
-//func (s *HeadersConf) SetConentType(value string) *HeadersConf {
-//	s.simpleReq.headers.Set(hdrContentTypeKey, value)
-//	return s
-//}
+//SetConentType
+func (s *HeadersConf) SetConentType(value string) *HeadersConf {
+	s.simpleReq.headers.Set(hdrContentTypeKey, value)
+	return s
+}
 
 func (s *HeadersConf) ConentType_json() *HeadersConf {
 	jsonData, err := json.Marshal(s.simpleReq.tempBody)
