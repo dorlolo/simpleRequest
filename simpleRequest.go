@@ -32,6 +32,7 @@ func NewRequest() *SimpleRequest {
 		timeout:     time.Second * 7,
 		queryParams: qp,
 		headers:     hd,
+		tempBody:    make(map[string]interface{}),
 	}
 }
 
@@ -67,6 +68,7 @@ func (s *SimpleRequest) NewRequest() *SimpleRequest {
 		//cookies: make(map[string]string),
 		timeout:     time.Second * 7,
 		queryParams: qp,
+		tempBody:    make(map[string]interface{}),
 	}
 }
 
@@ -120,15 +122,19 @@ func (s *SimpleRequest) do(request *http.Request) (body []byte, err error) {
 		client.Transport = s.transport
 	}
 	//3.1 发送数据
-	//todo resp的上下文返回一下
 	resp, err := client.Do(request)
 	if err != nil {
-		fmt.Println("error:", err.Error())
+		fmt.Println("【Request Error】:", err.Error())
 	}
 
-	//v1.0.1更新，将request和response内容返回，便于用户进行分析 JuneXu 03-11-2022
-	s.Response = *resp
-	s.Request = *request
+	//v0.0.2更新，将request和response内容返回，便于用户进行分析 JuneXu 03-11-2022
+	if resp != nil {
+		s.Response = *resp
+	}
+	if request != nil {
+		s.Request = *request
+	}
+
 	defer resp.Body.Close()
 	//3.2 获取数据
 	body, err = ioutil.ReadAll(resp.Body)

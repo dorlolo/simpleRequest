@@ -38,7 +38,7 @@ func TestRequest(t *testing.T) {
 	r.SkipCertVerify()          //跳过证书验证
 
 	//--发送请求,这里返回的直接是body中的数据，等后续增加功能
-	res, err := r.Get("www.webSite.com/end/point")
+	res, err := r.Get("http://www.webSite.com/end/point")
 	if err != nil {
 		t.Error(err)
 	} else {
