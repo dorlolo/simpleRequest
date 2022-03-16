@@ -40,6 +40,17 @@ r.Headers().Sets(mapHeaders)
 ```go
 r.Headers().Set("token", "d+jfdji*D%1=").Set("Content-Type", "application/json")
 ```
+
+#### 添加多值
+对单个key添加多只不要使用`.set`,因为原先的值会被覆盖
+```go
+r.Headers().Set("Accept", "text/html")
+r.Headers().Add("Accept","application/xhtml+xml")
+r.Headers().Add("Accept","application/xml;q=0.8")
+r.Headers().Add("Accept","image/webp")
+r.Headers().Add("Accept","*/*;q=0.8")
+```
+
 #### 使用预设的key
 ```go
 r.Headers().SetConentType("application/json")
