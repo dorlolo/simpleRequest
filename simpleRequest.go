@@ -149,8 +149,8 @@ func (s *SimpleRequest) Post(urls string) (body []byte, err error) {
 	}
 	//headers
 	for k := range s.headers {
+		r.Header[k] = append(r.Header[k], s.headers[k]...)
 		s.headers.Del(k)
-		r.Header[k] = append(s.headers[k], s.headers[k]...)
 	}
 
 	//queryParams
@@ -170,8 +170,8 @@ func (s *SimpleRequest) Get(urls string) (body []byte, err error) {
 	}
 	//headers
 	for k := range s.headers {
+		r.Header[k] = append(r.Header[k], s.headers[k]...)
 		s.headers.Del(k)
-		r.Header[k] = append(s.headers[k], s.headers[k]...)
 	}
 	//queryParams
 	r.URL.RawQuery = s.queryParams.Encode()
