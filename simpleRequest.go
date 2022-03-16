@@ -210,8 +210,9 @@ func (s *SimpleRequest) initBody() {
 		jsonData, err := json.Marshal(s.tempBody)
 		if err == nil {
 			s.body = bytes.NewReader(jsonData)
+		} else {
+			s.body = bytes.NewReader([]byte("{}"))
 		}
-		s.body = bytes.NewReader(jsonData)
 	case contentTypeData == xmlDataType || contentTypeData == textPlainType || contentTypeData == javaScriptType:
 		data, _ := s.tempBody[stringBodyType].(string)
 		s.body = strings.NewReader(data)

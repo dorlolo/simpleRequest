@@ -131,7 +131,7 @@ r.Body().Set("beginDate", "2022-03-01").Set("endDate", "2022-03-03")
 ```
 
 #### 字符串赋值
-通过此方法直接赋值json数据
+json格式不要使用此方法
 ```go
 bodydata:=`{"devSn":"230000000008","type":"day"}`
 r.Body().SetString(bodydata)
