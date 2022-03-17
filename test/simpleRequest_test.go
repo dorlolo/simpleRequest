@@ -25,13 +25,11 @@ func TestRequest(t *testing.T) {
 	//设置params
 	r.QueryParams().Set("user", "dorlolo")
 	//支持一次性添加,不会覆盖上面user
-	pamarsBulid := make(map[string]interface{})
-	pamarsBulid["passwd"] = "123456"
-	pamarsBulid["action"] = "login"
-
-	paramsBuild2 := map[string]interface{}{
+	pamarsBulid := map[string]interface{}{
 		"passwd": "123456",
+		"action": "login",
 	}
+
 	r.QueryParams().Sets(pamarsBulid)
 
 	//--添加body

@@ -169,7 +169,7 @@ ftm.Println( "error occured", err)
 fmt.Println(res)
 }
 ```
-#### 其它请求
+#### 其它类型的请求
 后续支持...敬请期待
 
 
