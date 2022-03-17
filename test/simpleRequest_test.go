@@ -28,6 +28,10 @@ func TestRequest(t *testing.T) {
 	pamarsBulid := make(map[string]interface{})
 	pamarsBulid["passwd"] = "123456"
 	pamarsBulid["action"] = "login"
+
+	paramsBuild2 := map[string]interface{}{
+		"passwd": "123456",
+	}
 	r.QueryParams().Sets(pamarsBulid)
 
 	//--添加body

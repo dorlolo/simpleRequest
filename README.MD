@@ -1,4 +1,4 @@
-# simpleRequest -- 
+# simpleRequest 
 ## 说明
 [simpleRequest](www.github.com/dorlolo/simpleRequest) 是基于golang原生http库的封装，适合用来对第三方接口进行快速地对接和开发。
 它具备以下特点：
@@ -118,7 +118,7 @@ r.Body().Set("beginDate", "2022-03-01").Set("endDate", "2022-03-03")
 
 #### map赋值
 ```go
-bodyBulid := map[string]interface{
+bodyBulid := map[string]interface{}{
     "beginDate":"2022-03-01",
 	"endDate":"2022-03-03",
 }
