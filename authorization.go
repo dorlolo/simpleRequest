@@ -24,7 +24,7 @@ type Authorization struct {
 //  @param password
 //
 func (s *Authorization) Bearer(token string) {
-	s.simpleReq.headers.Set("Authorization", fmt.Sprintf("bearer %v", token))
+	s.simpleReq.headers.Set("Authorization", fmt.Sprintf("Bearer %v", token))
 }
 
 //
@@ -37,5 +37,5 @@ func (s *Authorization) Bearer(token string) {
 func (s *Authorization) Basic(username, password string) {
 	authStr := fmt.Sprintf("%v:%v", username, password)
 	data := base64.StdEncoding.EncodeToString([]byte(authStr))
-	s.simpleReq.headers.Set("Authorization", fmt.Sprintf("basic %v", data))
+	s.simpleReq.headers.Set("Authorization", fmt.Sprintf("Basic %v", data))
 }
