@@ -75,18 +75,29 @@ func (s *SimpleRequest) NewRequest() *SimpleRequest {
 //------------------------------------------------------
 //
 //						数据准备
-//
+
+//Authorization 添加令牌的方法集合
+func (s *SimpleRequest) Authorization() *Authorization {
+	return &Authorization{
+		simpleReq: s,
+	}
+}
+
+//Headers 添加请求头
 func (s *SimpleRequest) Headers() *HeadersConf {
 	return &HeadersConf{
 		simpleReq: s,
 	}
 }
+
+//Body 添加请求体
 func (s *SimpleRequest) Body() *BodyConf {
 	return &BodyConf{
 		simpleReq: s,
 	}
 }
 
+//QueryParams 添加url后面的参数
 func (s *SimpleRequest) QueryParams() *QueryParams {
 	return &QueryParams{
 		simpleReq: s,
