@@ -49,7 +49,8 @@ func TestRequest(t *testing.T) {
 
 }
 
-func TestAuth(t *testing.T) {
+//测试content-type 为 multipart/form-data格式的数据请求
+func TestAuth_fotmData(t *testing.T) {
 	req := simpleRequest.NewRequest()
 	req.Headers().ConentType_formData()
 	req.Headers().SetRandomUerAgent()
@@ -60,7 +61,7 @@ func TestAuth(t *testing.T) {
 	req.Body().Set("username", "shiming_zyf")
 	req.Body().Set("password", "zyf499bbcb9")
 
-	var URL = "https://shiming.cn-jzs.com/oauth/token"
+	var URL = ""
 
 	data, _ := req.Post(URL)
 	t.Log(string(data))
