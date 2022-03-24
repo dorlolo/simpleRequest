@@ -66,3 +66,15 @@ func TestAuth_fotmData(t *testing.T) {
 	data, _ := req.Post(URL)
 	t.Log(string(data))
 }
+
+//测试令牌验证
+func TestAuthorization(t *testing.T) {
+	req := simpleRequest.NewRequest()
+	req.Authorization().Bearer("19f0591e-fab1-4447-90c3-1c60aef78fbd")
+	req.Body().Set("prjnumber", "3205072020100901A01000")
+	req.Body().Set("date", "20220324")
+	data, err := req.Post("")
+	t.Log(string(data))
+	t.Log(err)
+
+}
