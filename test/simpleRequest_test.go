@@ -48,3 +48,20 @@ func TestRequest(t *testing.T) {
 	}
 
 }
+
+func TestAuth(t *testing.T) {
+	req := simpleRequest.NewRequest()
+	req.Headers().ConentType_formData()
+	req.Headers().SetRandomUerAgent()
+	req.Body().Set("grant_type", "password")
+	req.Body().Set("client_id", "smz")
+	req.Body().Set("client_secret", "smz")
+	req.Body().Set("scope", "getdata")
+	req.Body().Set("username", "shiming_zyf")
+	req.Body().Set("password", "zyf499bbcb9")
+
+	var URL = "https://shiming.cn-jzs.com/oauth/token"
+
+	data, _ := req.Post(URL)
+	t.Log(string(data))
+}

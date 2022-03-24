@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"strings"
@@ -224,6 +225,33 @@ func (s *SimpleRequest) initBody() {
 		} else {
 			s.body = bytes.NewReader([]byte("{}"))
 		}
+	case contentTypeData == formDataType:
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+		//data := url.Values{}
+		for k, sv := range s.tempBody {
+			switch sv.(type) {
+			case string:
+				strSv, _ := sv.(string)
+				_ = writer.WriteField(k, strSv)
+				//data.Set(k, strSv)
+			case []string:
+				sss, _ := sv.([]string)
+				for _, v := range sss {
+					_ = writer.WriteField(k, v)
+					//data.Add(k, v)
+				}
+			}
+		}
+		err := writer.Close()
+		if err != nil {
+			panic(err)
+		}
+		s.headers.Set("Content-Type", writer.FormDataContentType())
+		//strD := data.Encode()
+		//bodyText := strings.NewReader(strD)
+		s.body = body
+
 	case contentTypeData == xmlDataType || contentTypeData == textPlainType || contentTypeData == javaScriptType:
 		data, _ := s.tempBody[stringBodyType].(string)
 		s.body = strings.NewReader(data)
