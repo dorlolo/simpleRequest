@@ -225,7 +225,7 @@ func (s *SimpleRequest) initBody() {
 		} else {
 			s.body = bytes.NewReader([]byte("{}"))
 		}
-	case contentTypeData == formDataType:
+	case strings.Contains(contentTypeData, "multipart/form-data"):
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
 		//data := url.Values{}
@@ -254,9 +254,8 @@ func (s *SimpleRequest) initBody() {
 	case strings.Contains(contentTypeData, "text") || strings.Contains(contentTypeData, javaScriptType):
 		data, _ := s.tempBody[stringBodyType].(string)
 		s.body = strings.NewReader(data)
-	case contentTypeData == "" || strings.Contains(contentTypeData, "form"):
+	case contentTypeData == "" || strings.Contains(contentTypeData, "form-urlencoded"):
 		//默认为x-www-form-urlencoded格式
-		//x-www-form-urlencoded ,multipart/form-data ..等form格式走此方法
 		tmpData := url.Values{}
 		for k, v := range tmpData {
 			tmpData.Set(k, fmt.Sprintf("%v", v))
