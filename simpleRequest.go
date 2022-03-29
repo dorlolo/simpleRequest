@@ -263,6 +263,7 @@ func (s *SimpleRequest) initBody() {
 		s.body = strings.NewReader(tmpData.Encode())
 		s.Headers().ConentType_formUrlencoded()
 	default:
+		//todo 自动判断数据类型
 		tmpData := url.Values{}
 		for k, v := range tmpData {
 			tmpData.Set(k, fmt.Sprintf("%v", v))
