@@ -25,13 +25,14 @@ var (
 	hdrContentEncodingKey = http.CanonicalHeaderKey("Content-Encoding")
 	hdrLocationKey        = http.CanonicalHeaderKey("Location")
 
-	plainTextType      = "text/plain; charset=utf-8"
 	jsonContentType    = "application/json"
 	formUrlencodedType = "application/x-www-form-urlencoded"
 	formDataType       = "multipart/form-data"
 	xmlDataType        = "application/xml"
 	textPlainType      = "text/plain"
 	javaScriptType     = "javascript"
+
+	charsetUtf8 = "charset=utf-8"
 
 	jsonCheck = regexp.MustCompile(`(?i:(application|text)/(json|.*\+json|json\-.*)(;|$))`)
 	xmlCheck  = regexp.MustCompile(`(?i:(application|text)/(xml|.*\+xml)(;|$))`)
@@ -109,6 +110,11 @@ func (s *HeadersConf) ConentType_json() *HeadersConf {
 	return s
 }
 
+func (s *HeadersConf) ConentType_charsetUtf8() *HeadersConf {
+	s.simpleReq.headers.Add(hdrContentTypeKey, charsetUtf8)
+	return s
+}
+
 func (s *HeadersConf) ConentType_formData() *HeadersConf {
 	//tmp := url.Values{}
 
@@ -123,7 +129,7 @@ func (s *HeadersConf) ConentType_formUrlencoded() *HeadersConf {
 	return s
 }
 func (s *HeadersConf) ConentType_textPlain() *HeadersConf {
-	s.simpleReq.headers.Set(hdrContentTypeKey, plainTextType)
+	s.simpleReq.headers.Set(hdrContentTypeKey, textPlainType)
 	return s
 }
 

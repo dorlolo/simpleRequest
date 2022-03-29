@@ -218,7 +218,7 @@ func (s *SimpleRequest) Get(urls string) (body []byte, err error) {
 func (s *SimpleRequest) initBody() {
 	contentTypeData := s.headers.Get(hdrContentTypeKey)
 	switch {
-	case contentTypeData == jsonContentType:
+	case IsJSONType(contentTypeData):
 		jsonData, err := json.Marshal(s.tempBody)
 		if err == nil {
 			s.body = bytes.NewReader(jsonData)
@@ -234,12 +234,10 @@ func (s *SimpleRequest) initBody() {
 			case string:
 				strSv, _ := sv.(string)
 				_ = writer.WriteField(k, strSv)
-				//data.Set(k, strSv)
 			case []string:
 				sss, _ := sv.([]string)
 				for _, v := range sss {
 					_ = writer.WriteField(k, v)
-					//data.Add(k, v)
 				}
 			}
 		}
@@ -248,21 +246,24 @@ func (s *SimpleRequest) initBody() {
 			panic(err)
 		}
 		s.headers.Set("Content-Type", writer.FormDataContentType())
-		//strD := data.Encode()
-		//bodyText := strings.NewReader(strD)
 		s.body = body
-
-	case contentTypeData == xmlDataType || contentTypeData == textPlainType || contentTypeData == javaScriptType:
+	case IsXMLType(contentTypeData):
+		//application/soap+xml ,application/xml
 		data, _ := s.tempBody[stringBodyType].(string)
 		s.body = strings.NewReader(data)
-	case contentTypeData == "":
+	case strings.Contains(contentTypeData, "text") || strings.Contains(contentTypeData, javaScriptType):
+		data, _ := s.tempBody[stringBodyType].(string)
+		s.body = strings.NewReader(data)
+	case contentTypeData == "" || strings.Contains(contentTypeData, "form"):
+		//默认为x-www-form-urlencoded格式
+		//x-www-form-urlencoded ,multipart/form-data ..等form格式走此方法
 		tmpData := url.Values{}
 		for k, v := range tmpData {
 			tmpData.Set(k, fmt.Sprintf("%v", v))
 		}
 		s.body = strings.NewReader(tmpData.Encode())
 		s.Headers().ConentType_formUrlencoded()
-	default: //x-www-form-urlencoded ,multipart/form-data ..
+	default:
 		tmpData := url.Values{}
 		for k, v := range tmpData {
 			tmpData.Set(k, fmt.Sprintf("%v", v))

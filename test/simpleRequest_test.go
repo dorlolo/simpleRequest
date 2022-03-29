@@ -10,7 +10,10 @@ package test
 import (
 	"fmt"
 	"github.com/dorlolo/simpleRequest"
-
+	"github.com/dorlolo/simpleRequest/test/simpleCrypto"
+	"github.com/dorlolo/simpleRequest/test/timeUtil"
+	"net/http"
+	"strings"
 	"testing"
 	"time"
 )
@@ -76,5 +79,59 @@ func TestAuthorization(t *testing.T) {
 	data, err := req.Post("")
 	t.Log(string(data))
 	t.Log(err)
+
+}
+
+func TestXml(t *testing.T) {
+	idcard := "320324196705101880"
+	thisDate := time.Now().Format(timeUtil.TimeFormat.NoSpacer_YMD)
+	passStr := fmt.Sprintf("%v%vsparkcn", idcard, thisDate)
+	pass := simpleCrypto.Md5Enscrypto(passStr)
+	urlAddr := "http://218.4.84.171:5445/AppWebService/GHBackBone_SAMWS.asmx?Content-Type=application/soap+xml;charset=utf-8"
+	body := fmt.Sprintf(`<?xml version="1.0" encoding="utf-8"?>
+<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+    <soap12:Body>
+        <GetWorkerSAM xmlns="http://tempuri.org/">
+            <zjhm>%v</zjhm>
+            <pass>%v</pass>
+        </GetWorkerSAM>
+    </soap12:Body>
+</soap12:Envelope>`, idcard, pass)
+	req := simpleRequest.NewRequest()
+	req.Headers().Set("Content-Type", "application/soap+xml;charset=utf-8")
+	req.Headers().SetRandomUerAgent()
+	req.Body().SetString(body)
+	data, err := req.Post(urlAddr)
+	t.Log(string(data))
+	t.Log(err)
+	return
+}
+
+func TestIsJsonType(t *testing.T) {
+	var headers = http.Header{}
+	headers.Set("Content-Type", "application/json")
+	headers.Add("Content-Type", "charset=UTF-8")
+	RES := simpleRequest.IsJSONType(headers.Get("Content-Type"))
+	t.Log(RES)
+
+}
+func TestIsXmlType(t *testing.T) {
+	var headers = http.Header{}
+	headers.Add("Content-Type", "application/soap+xml;charset=utf-8")
+	RES := simpleRequest.IsXMLType(headers.Get("Content-Type"))
+	t.Log(RES)
+}
+
+func TestTextPlain(t *testing.T) {
+
+	var headers = http.Header{}
+	headers.Add("Content-Type", "text/plain;charset=utf-8")
+
+	res := strings.Contains(headers.Get("Content-Type"), "text")
+	if res {
+		t.Log(res)
+	} else {
+		t.Log(false)
+	}
 
 }
