@@ -137,6 +137,7 @@ func (s *SimpleRequest) do(request *http.Request) (body []byte, err error) {
 	resp, err := client.Do(request)
 	if err != nil {
 		fmt.Println("【Request Error】:", err.Error())
+		return
 	}
 
 	//v0.0.2更新，将request和response内容返回，便于用户进行分析 JuneXu 03-11-2022
