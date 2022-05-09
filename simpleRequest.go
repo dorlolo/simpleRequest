@@ -193,6 +193,48 @@ func (s *SimpleRequest) Get(urls string) (body []byte, err error) {
 	return
 }
 
+//通用的请求方法
+func (s *SimpleRequest) LaunchTo(urls, method string) (body []byte, err error) {
+	// body
+	s.initBody()
+	r, err := http.NewRequest(method, urls, s.body)
+	if err != nil {
+		return nil, err
+	}
+	//headers
+	for k := range s.headers {
+		r.Header[k] = append(r.Header[k], s.headers[k]...)
+		s.headers.Del(k)
+	}
+	//queryParams
+	r.URL.RawQuery = s.queryParams.Encode()
+
+	body, err = s.do(r)
+	return
+}
+
+func (s *SimpleRequest) Put(url string) (body []byte, err error) {
+	return s.LaunchTo(url, http.MethodPut)
+}
+func (s *SimpleRequest) DELETE(url string) (body []byte, err error) {
+	return s.LaunchTo(url, http.MethodDelete)
+}
+func (s *SimpleRequest) PATCH(url string) (body []byte, err error) {
+	return s.LaunchTo(url, http.MethodPatch)
+}
+func (s *SimpleRequest) HEAD(url string) (body []byte, err error) {
+	return s.LaunchTo(url, http.MethodHead)
+}
+func (s *SimpleRequest) CONNECT(url string) (body []byte, err error) {
+	return s.LaunchTo(url, http.MethodConnect)
+}
+func (s *SimpleRequest) OPTIONS(url string) (body []byte, err error) {
+	return s.LaunchTo(url, http.MethodOptions)
+}
+func (s *SimpleRequest) TRACE(url string) (body []byte, err error) {
+	return s.LaunchTo(url, http.MethodTrace)
+}
+
 // Put method does PUT HTTP request. It's defined in section 4.3.4 of RFC7231.
 //func (s *SimpleRequest) Put(url string) (*Response, error) {
 //	return r.Execute(MethodPut, url)
