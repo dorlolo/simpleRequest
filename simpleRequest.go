@@ -258,7 +258,7 @@ func (s *SimpleRequest) initBody() {
 	case contentTypeData == "" || strings.Contains(contentTypeData, "form-urlencoded"):
 		//默认为x-www-form-urlencoded格式
 		tmpData := url.Values{}
-		for k, v := range tmpData {
+		for k, v := range s.tempBody {
 			tmpData.Set(k, fmt.Sprintf("%v", v))
 		}
 		s.body = strings.NewReader(tmpData.Encode())
