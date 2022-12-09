@@ -1,17 +1,15 @@
 /*
  * @FileName:   simpleRequest_test.go
- * @Author:		JuneXu
+ * @Author:		JJXu
  * @CreateTime:	2022/3/3 下午11:34
  * @Description:
  */
 
-package test
+package excample
 
 import (
 	"fmt"
 	"github.com/dorlolo/simpleRequest"
-	"github.com/dorlolo/simpleRequest/test/simpleCrypto"
-	"github.com/dorlolo/simpleRequest/test/timeUtil"
 	"net/http"
 	"strings"
 	"testing"
@@ -27,12 +25,11 @@ func TestRequest(t *testing.T) {
 
 	//设置params
 	r.QueryParams().Set("user", "dorlolo")
-	//支持一次性添加,不会覆盖上面user
+	//批量添加,不会覆盖上面user
 	pamarsBulid := map[string]interface{}{
 		"passwd": "123456",
 		"action": "login",
 	}
-
 	r.QueryParams().Sets(pamarsBulid)
 
 	//--添加body
@@ -43,7 +40,7 @@ func TestRequest(t *testing.T) {
 	r.SkipCertVerify()          //跳过证书验证
 
 	//--发送请求,这里返回的直接是body中的数据，等后续增加功能
-	res, err := r.Get("http://www.webSite.com/end/point")
+	res, err := r.GET("http://www.webSite.com/end/point")
 	if err != nil {
 		t.Error(err)
 	} else {
@@ -57,16 +54,16 @@ func TestAuth_fotmData(t *testing.T) {
 	req := simpleRequest.NewRequest()
 	req.Headers().ConentType_formData()
 	req.Headers().SetRandomUerAgent()
-	req.Body().Set("grant_type", "password")
-	req.Body().Set("client_id", "smz")
-	req.Body().Set("client_secret", "smz")
-	req.Body().Set("scope", "getdata")
-	req.Body().Set("username", "shiming_zyf")
-	req.Body().Set("password", "zyf499bbcb9")
+	req.Body().Set("grant_type", "password").
+		Set("client_id", "smz").
+		Set("client_secret", "smz").
+		Set("scope", "getdata").
+		Set("username", "shiming_zyf").
+		Set("password", "zyf499bbcb9")
 
 	var URL = ""
 
-	data, _ := req.Post(URL)
+	data, _ := req.POST(URL)
 	t.Log(string(data))
 }
 
@@ -74,9 +71,10 @@ func TestAuth_fotmData(t *testing.T) {
 func TestAuthorization(t *testing.T) {
 	req := simpleRequest.NewRequest()
 	req.Authorization().Bearer("19f0591e-fab1-4447-90c3-1c60aef78fbd")
-	req.Body().Set("prjnumber", "3205072020100901A01000")
-	req.Body().Set("date", "20220324")
-	data, err := req.Post("")
+	req.Body().
+		Set("prjnumber", "3205072020100901A01000").
+		Set("date", "20220324")
+	data, err := req.PUT("")
 	t.Log(string(data))
 	t.Log(err)
 
@@ -84,9 +82,7 @@ func TestAuthorization(t *testing.T) {
 
 func TestXml(t *testing.T) {
 	idcard := "320324196705101880"
-	thisDate := time.Now().Format(timeUtil.TimeFormat.NoSpacer_YMD)
-	passStr := fmt.Sprintf("%v%vsparkcn", idcard, thisDate)
-	pass := simpleCrypto.Md5Enscrypto(passStr)
+	pass := "96778"
 	urlAddr := "http://218.4.84.171:5445/AppWebService/GHBackBone_SAMWS.asmx?Content-Type=application/soap+xml;charset=utf-8"
 	body := fmt.Sprintf(`<?xml version="1.0" encoding="utf-8"?>
 <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
@@ -98,10 +94,11 @@ func TestXml(t *testing.T) {
     </soap12:Body>
 </soap12:Envelope>`, idcard, pass)
 	req := simpleRequest.NewRequest()
-	req.Headers().Set("Content-Type", "application/soap+xml;charset=utf-8")
-	req.Headers().SetRandomUerAgent()
+	req.Headers().
+		Set("Content-Type", "application/soap+xml;charset=utf-8").
+		SetRandomUerAgent()
 	req.Body().SetString(body)
-	data, err := req.Post(urlAddr)
+	data, err := req.POST(urlAddr)
 	t.Log(string(data))
 	t.Log(err)
 	return

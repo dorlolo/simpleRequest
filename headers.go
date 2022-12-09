@@ -1,6 +1,6 @@
 /*
  * @FileName:   header.go
- * @Author:		JuneXu
+ * @Author:		JJXu
  * @CreateTime:	2022/3/1 下午9:44
  * @Description:
  */
@@ -103,7 +103,7 @@ func (s *HeadersConf) SetConentType(value string) *HeadersConf {
 func (s *HeadersConf) ConentType_json() *HeadersConf {
 	jsonData, err := json.Marshal(s.simpleReq.tempBody)
 	if err == nil {
-		s.simpleReq.body = bytes.NewReader(jsonData)
+		s.simpleReq.body = bytes.NewReader([]byte("{}"))
 	}
 	s.simpleReq.body = bytes.NewReader(jsonData)
 	s.simpleReq.headers.Set(hdrContentTypeKey, jsonContentType)

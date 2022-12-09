@@ -1,6 +1,6 @@
 /*
  * @FileName:   simpleRequest.go
- * @Author:		JuneXu
+ * @Author:		JJXu
  * @CreateTime:	2022/3/2 上午12:33
  * @Description:
  */
@@ -140,7 +140,7 @@ func (s *SimpleRequest) do(request *http.Request) (body []byte, err error) {
 		return
 	}
 
-	//v0.0.2更新，将request和response内容返回，便于用户进行分析 JuneXu 03-11-2022
+	//v0.0.2更新，将request和response内容返回，便于用户进行分析 JJXu 03-11-2022
 	if resp != nil {
 		s.Response = *resp
 	}
@@ -154,7 +154,8 @@ func (s *SimpleRequest) do(request *http.Request) (body []byte, err error) {
 	return
 }
 
-func (s *SimpleRequest) Post(urls string) (body []byte, err error) {
+// POST method does POST HTTP request. It's defined in section 2 of RFC5789.
+func (s *SimpleRequest) POST(urls string) (body []byte, err error) {
 	s.initBody()
 	r, err := http.NewRequest(http.MethodPost, urls, s.body)
 	if err != nil {
@@ -174,7 +175,8 @@ func (s *SimpleRequest) Post(urls string) (body []byte, err error) {
 	return
 }
 
-func (s *SimpleRequest) Get(urls string) (body []byte, err error) {
+// GET method does GET HTTP request. It's defined in section 2 of RFC5789.
+func (s *SimpleRequest) GET(urls string) (body []byte, err error) {
 	// body
 	s.initBody()
 	r, err := http.NewRequest(http.MethodGet, urls, s.body)
@@ -213,47 +215,41 @@ func (s *SimpleRequest) LaunchTo(urls, method string) (body []byte, err error) {
 	return
 }
 
-func (s *SimpleRequest) Put(url string) (body []byte, err error) {
+// PUT method does PUT HTTP request. It's defined in section 4.3.4 of RFC7231.
+func (s *SimpleRequest) PUT(url string) (body []byte, err error) {
 	return s.LaunchTo(url, http.MethodPut)
 }
+
+// DELETE method does DELETE HTTP request. It's defined in section 2 of RFC5789.
 func (s *SimpleRequest) DELETE(url string) (body []byte, err error) {
 	return s.LaunchTo(url, http.MethodDelete)
 }
+
+// Patch method does Patch HTTP request. It's defined in section 2 of RFC5789.
 func (s *SimpleRequest) PATCH(url string) (body []byte, err error) {
 	return s.LaunchTo(url, http.MethodPatch)
 }
+
+// HEAD method does HEAD HTTP request. It's defined in section 2 of RFC5789.
 func (s *SimpleRequest) HEAD(url string) (body []byte, err error) {
 	return s.LaunchTo(url, http.MethodHead)
 }
+
+// CONNECT method does CONNECT HTTP request. It's defined in section 2 of RFC5789.
 func (s *SimpleRequest) CONNECT(url string) (body []byte, err error) {
 	return s.LaunchTo(url, http.MethodConnect)
 }
+
+// OPTIONS method does OPTIONS HTTP request. It's defined in section 2 of RFC5789.
 func (s *SimpleRequest) OPTIONS(url string) (body []byte, err error) {
 	return s.LaunchTo(url, http.MethodOptions)
 }
+
+// TRACE method does TRACE HTTP request. It's defined in section 2 of RFC5789.
 func (s *SimpleRequest) TRACE(url string) (body []byte, err error) {
 	return s.LaunchTo(url, http.MethodTrace)
 }
 
-// Put method does PUT HTTP request. It's defined in section 4.3.4 of RFC7231.
-//func (s *SimpleRequest) Put(url string) (*Response, error) {
-//	return r.Execute(MethodPut, url)
-//}
-
-// Delete method does DELETE HTTP request. It's defined in section 4.3.5 of RFC7231.
-//func (s *SimpleRequest) Delete(url string) (*Response, error) {
-//	return r.Execute(MethodDelete, url)
-//}
-
-// Options method does OPTIONS HTTP request. It's defined in section 4.3.7 of RFC7231.
-//func (s *SimpleRequest) Options(url string) (*Response, error) {
-//	return r.Execute(MethodOptions, url)
-//}
-
-// Patch method does PATCH HTTP request. It's defined in section 2 of RFC5789.
-//func (s *SimpleRequest) Patch(url string) (*Response, error) {
-//	return r.Execute(MethodPatch, url)
-//}
 //------------------------------------------------------
 //
 //						这里数据

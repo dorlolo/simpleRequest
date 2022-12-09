@@ -1,6 +1,6 @@
 /*
  * @FileName:   auth.go
- * @Author:		JuneXu
+ * @Author:		JJXu
  * @CreateTime:	2022/3/24 上午12:09
  * @Description:
  */

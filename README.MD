@@ -72,13 +72,13 @@ r.Headers().SetRandomUerAgent()
 r.Headers().ConentType_json()
 //r.Headers().Set("Content-Type", "application/json")
 
-r.Headers()ConentType_formData()
+r.Headers().ConentType_formData()
 //r.Headers().Set("Content-Type","multipart/form-data")
 
-r.Headers()ConentType_formUrlencoded()
+r.Headers().ConentType_formUrlencoded()
 //r.Headers().Set("Content-Type","application/x-www-form-urlencoded")
 
-r.Headers()ConentType_textPlain()
+r.Headers().ConentType_textPlain()
 //r.Headers().Set("Content-Type","text/plain; charset=utf-8")
 ```
 
@@ -160,7 +160,7 @@ if err != nil {
 }
 ```
 
-#### 2.7.2 get请求
+#### 2.7.2 发送请求
 ```go
 res, err :=r.Get("https://127.0.0.1:80/excample")
 if err != nil {
@@ -169,8 +169,16 @@ ftm.Println( "error occured", err)
 fmt.Println(res)
 }
 ```
-#### 2.7.3 其它类型的请求
-后续支持...敬请期待
+**支持的请求类型有**
+- POST
+- GET
+- PUT
+- DELETE
+- PATCH
+- HEAD
+- CONNECT
+- OPTIONS
+- TRACE
 
 
 ### 2.8 获取上下文
@@ -186,4 +194,4 @@ responseContext:=r.Response
 ```
 
 ## 3. 使用示例
-[simpleRequest_test.go](./test/simpleRequest_test.go)
+[simpleRequest_test.go](excample/simpleRequest_test.go)
