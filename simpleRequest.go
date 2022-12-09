@@ -267,14 +267,14 @@ func (s *SimpleRequest) initBody() {
 	case IsJSONType(contentTypeData):
 		var parser, ok = s.bodyEntryParsers[jsonContentType]
 		if !ok {
-			panic(fmt.Sprintf("cannot find %s type parser", contentTypeData))
+			parser = new(JsonParser)
 		}
 		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 
 	case strings.Contains(contentTypeData, formDataType):
 		var parser, ok = s.bodyEntryParsers[formDataType]
 		if !ok {
-			panic(fmt.Sprintf("cannot find %s type parser", contentTypeData))
+			parser = new(FormDataParser)
 		}
 		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 		fdParser := parser.(*FormDataParser)
@@ -286,6 +286,7 @@ func (s *SimpleRequest) initBody() {
 		if !ok {
 			data, _ := s.BodyEntries[StringEntryType.string()].(string)
 			s.body = strings.NewReader(data)
+			return
 		}
 		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 
@@ -294,6 +295,7 @@ func (s *SimpleRequest) initBody() {
 		if !ok {
 			data, _ := s.BodyEntries[StringEntryType.string()].(string)
 			s.body = strings.NewReader(data)
+			return
 		}
 		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 
@@ -307,6 +309,7 @@ func (s *SimpleRequest) initBody() {
 			}
 			s.body = strings.NewReader(tmpData.Encode())
 			s.Headers().ConentType_formUrlencoded()
+			return
 		}
 		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 	default:
