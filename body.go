@@ -7,6 +7,7 @@
 
 package simpleRequest
 
+// EntryMark 请求体条目标记，用于标记输入的body内容格式
 type EntryMark string
 
 func (b EntryMark) string() string {
