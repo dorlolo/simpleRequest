@@ -110,13 +110,15 @@ qpData.Add("age","18")
 
 ### 2.5 添加请求体body
 
-#### 2.5.1 单个赋值
+#### 2.5.1 单个参数赋值
+支持和map赋值同时使用
 ```go
 r.Body().Set("beginDate", "2022-03-01").Set("endDate", "2022-03-03")
 
 ```
 
 #### 2.5.2 map赋值
+支持和单个参数赋值同时使用
 ```go
 bodyBulid := map[string]any{
     "beginDate":"2022-03-01",
@@ -125,16 +127,37 @@ bodyBulid := map[string]any{
 r.Body().Sets(bodyBulid)
 ```
 
-#### 2.5.3 链式赋值
+#### 2.5.3 技巧：链式赋值
 ```go
 r.Body().Set("beginDate", "2022-03-01").Set("endDate", "2022-03-03")
 ```
 
 #### 2.5.4 字符串赋值
-json格式不要使用此方法
+此方法为一次性赋值，不支持和其它赋值方法同时使用
 ```go
 bodydata:=`{"devSn":"230000000008","type":"day"}`
 r.Body().SetString(bodydata)
+```
+
+#### 2.5.5 字节赋值
+此方法为一次性赋值，不支持和其它赋值方法同时使用
+```go
+bytesdata:=[]byte(`{"devSn":"230000000008","type":"day"}`)
+r.Body().SetBytes(bytesdata)
+```
+
+#### 2.5.6 结构体赋值
+此方法为一次性赋值，不支持和其它赋值方法同时使用
+```go
+type demo struct{
+	DevSn string `json:"devSn"`
+	Type string `json:"day"`
+}
+modeldata:=demo{
+    DevSn:"230000000008"
+    Type:"day"
+}
+r.Body().SetModel(&modeldata)
 ```
 
 ###  2.6 其它请求参数
