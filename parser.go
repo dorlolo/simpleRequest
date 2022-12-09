@@ -32,12 +32,11 @@ func (JsonParser) Unmarshal(bodyType EntryMark, BodyEntry map[string]any) io.Rea
 	case BytesEntryType:
 		return bytes.NewReader(BodyEntry[BytesEntryType.string()].([]byte))
 	case ModelEntryType:
-		jsonData, err := json.Marshal(BodyEntry[BytesEntryType.string()])
+		jsonData, err := json.Marshal(BodyEntry[ModelEntryType.string()])
 		if err == nil {
 			return bytes.NewReader(jsonData)
-		} else {
-			return strings.NewReader("{}")
 		}
+		return strings.NewReader("{}")
 	case MapEntryType:
 		jsonData, err := json.Marshal(BodyEntry)
 		if err == nil {
@@ -81,7 +80,7 @@ func (f *FormDataParser) Unmarshal(bodyType EntryMark, BodyEntry map[string]any)
 		return strings.NewReader(BodyEntry[StringEntryType.string()].(string))
 	case BytesEntryType:
 		f.ContentType = formDataType
-		return bytes.NewReader(BodyEntry[StringEntryType.string()].([]byte))
+		return bytes.NewReader(BodyEntry[BytesEntryType.string()].([]byte))
 	default:
 		body, f.ContentType = multipartCommonParse(BodyEntry)
 	}

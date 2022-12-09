@@ -67,3 +67,20 @@ func TestPost_withSets(t *testing.T) {
 		t.Log(string(result))
 	}
 }
+
+func TestPost_withSetModel(t *testing.T) {
+	go httpserver()
+
+	var r = NewRequest()
+	r.Headers().ConentType_json()
+	var entry = api{
+		Name: "JJXu",
+	}
+	r.Body().SetModel(&entry)
+	result, err := r.POST("http://localhost:8989/")
+	if err != nil {
+		t.Error(err.Error())
+	} else {
+		t.Log(string(result))
+	}
+}
