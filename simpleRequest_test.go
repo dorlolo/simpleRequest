@@ -57,7 +57,7 @@ func TestPost_withSets(t *testing.T) {
 
 	var r = NewRequest()
 	r.Headers().ConentType_json()
-	r.Body().Sets(map[string]interface{}{
+	r.Body().Sets(map[string]any{
 		"name": "JJXu",
 	})
 	result, err := r.POST("http://localhost:8989/")

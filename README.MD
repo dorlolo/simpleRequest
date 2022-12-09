@@ -90,7 +90,7 @@ r.QueryParams().Set("user", "dorlolo")
 #### 2.4.2 map赋值
 不会覆盖上面之前填充过的参数
 ```go
-pamarsBulid := make(map[string]interface{})
+pamarsBulid := make(map[string]any)
 pamarsBulid["passwd"] = "123456"
 pamarsBulid["action"] = "login"
 r.QueryParams().Sets(pamarsBulid)
@@ -118,7 +118,7 @@ r.Body().Set("beginDate", "2022-03-01").Set("endDate", "2022-03-03")
 
 #### 2.5.2 map赋值
 ```go
-bodyBulid := map[string]interface{}{
+bodyBulid := map[string]any{
     "beginDate":"2022-03-01",
 	"endDate":"2022-03-03",
 }

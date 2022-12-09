@@ -8,33 +8,37 @@
 package simpleRequest
 
 import (
-	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"mime/multipart"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 )
 
-func NewRequest() *SimpleRequest {
+func NewRequest(opts ...OPTION) *SimpleRequest {
 	var (
 		hd = http.Header{}
 		qp = url.Values{}
 	)
 
-	return &SimpleRequest{
+	var r = &SimpleRequest{
 		//headers: make(map[string]string),
 		//cookies: make(map[string]string),
-		timeout:     time.Second * 7,
-		queryParams: qp,
-		headers:     hd,
-		tempBody:    make(map[string]interface{}),
+		timeout:          time.Second * 7,
+		queryParams:      qp,
+		headers:          hd,
+		BodyEntries:      make(map[string]any),
+		bodyEntryParsers: bodyEntryParsers,
 	}
+	if len(opts) > 0 {
+		for _, o := range opts {
+			r = o(r)
+		}
+	}
+	return r
 }
 
 type SimpleRequest struct {
@@ -44,13 +48,16 @@ type SimpleRequest struct {
 	headers     http.Header
 	transport   *http.Transport
 
-	tempBody map[string]interface{}
-	timeout  time.Duration
+	BodyEntryMark    EntryMark
+	BodyEntries      map[string]any
+	bodyEntryParsers map[string]IBodyEntryParser
+
+	timeout time.Duration
 
 	Response http.Response //用于获取完整的返回内容。请注意要在请求之后才能获取
 	Request  http.Request  //用于获取完整的请求内容。请注意要在请求之后才能获取
 	//cookies           map[string]string
-	//data              interface{}
+	//data              any
 	//cli               *http.Client
 	//debug             bool
 	//method            string
@@ -62,16 +69,16 @@ type SimpleRequest struct {
 	//checkRedirect     func(req *http.Request, via []*http.Request) error
 }
 
-func (s *SimpleRequest) NewRequest() *SimpleRequest {
-	var qp = url.Values{}
-	return &SimpleRequest{
-		//headers: make(map[string]string),
-		//cookies: make(map[string]string),
-		timeout:     time.Second * 7,
-		queryParams: qp,
-		tempBody:    make(map[string]interface{}),
-	}
-}
+//func (s *SimpleRequest) NewRequest() *SimpleRequest {
+//	var qp = url.Values{}
+//	return &SimpleRequest{
+//		//headers: make(map[string]string),
+//		//cookies: make(map[string]string),
+//		timeout:     time.Second * 7,
+//		queryParams: qp,
+//		BodyEntries:   make(map[string]any),
+//	}
+//}
 
 //------------------------------------------------------
 //
@@ -258,49 +265,50 @@ func (s *SimpleRequest) initBody() {
 	contentTypeData := s.headers.Get(hdrContentTypeKey)
 	switch {
 	case IsJSONType(contentTypeData):
-		jsonData, err := json.Marshal(s.tempBody)
-		if err == nil {
-			s.body = bytes.NewReader(jsonData)
-		} else {
-			s.body = bytes.NewReader([]byte("{}"))
+		var parser, ok = s.bodyEntryParsers[jsonContentType]
+		if !ok {
+			panic(fmt.Sprintf("cannot find %s type parser", contentTypeData))
 		}
-	case strings.Contains(contentTypeData, "multipart/form-data"):
-		body := &bytes.Buffer{}
-		writer := multipart.NewWriter(body)
-		//data := url.Values{}
-		for k, sv := range s.tempBody {
-			switch sv.(type) {
-			case string:
-				strSv, _ := sv.(string)
-				_ = writer.WriteField(k, strSv)
-			case []string:
-				sss, _ := sv.([]string)
-				for _, v := range sss {
-					_ = writer.WriteField(k, v)
-				}
-			}
+		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
+
+	case strings.Contains(contentTypeData, formDataType):
+		var parser, ok = s.bodyEntryParsers[formDataType]
+		if !ok {
+			panic(fmt.Sprintf("cannot find %s type parser", contentTypeData))
 		}
-		err := writer.Close()
-		if err != nil {
-			panic(err)
-		}
-		s.headers.Set("Content-Type", writer.FormDataContentType())
-		s.body = body
+		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
+		fdParser := parser.(*FormDataParser)
+		s.headers.Set("Content-Type", fdParser.ContentType)
+
 	case IsXMLType(contentTypeData):
 		//application/soap+xml ,application/xml
-		data, _ := s.tempBody[stringBodyType].(string)
-		s.body = strings.NewReader(data)
+		var parser, ok = s.bodyEntryParsers[xmlDataType]
+		if !ok {
+			data, _ := s.BodyEntries[StringEntryType.string()].(string)
+			s.body = strings.NewReader(data)
+		}
+		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
+
 	case strings.Contains(contentTypeData, "text") || strings.Contains(contentTypeData, javaScriptType):
-		data, _ := s.tempBody[stringBodyType].(string)
-		s.body = strings.NewReader(data)
+		var parser, ok = s.bodyEntryParsers[textPlainType]
+		if !ok {
+			data, _ := s.BodyEntries[StringEntryType.string()].(string)
+			s.body = strings.NewReader(data)
+		}
+		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
+
 	case contentTypeData == "" || strings.Contains(contentTypeData, "form-urlencoded"):
 		//默认为x-www-form-urlencoded格式
-		tmpData := url.Values{}
-		for k, v := range s.tempBody {
-			tmpData.Set(k, fmt.Sprintf("%v", v))
+		var parser, ok = s.bodyEntryParsers["form-urlencoded"]
+		if !ok {
+			tmpData := url.Values{}
+			for k, v := range s.BodyEntries {
+				tmpData.Set(k, fmt.Sprintf("%v", v))
+			}
+			s.body = strings.NewReader(tmpData.Encode())
+			s.Headers().ConentType_formUrlencoded()
 		}
-		s.body = strings.NewReader(tmpData.Encode())
-		s.Headers().ConentType_formUrlencoded()
+		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 	default:
 		//todo 自动判断数据类型
 		tmpData := url.Values{}

@@ -9,7 +9,6 @@ package simpleRequest
 
 import (
 	"bytes"
-	"encoding/json"
 	"math/rand"
 	"net/http"
 	"regexp"
@@ -36,7 +35,7 @@ var (
 
 	jsonCheck = regexp.MustCompile(`(?i:(application|text)/(json|.*\+json|json\-.*)(;|$))`)
 	xmlCheck  = regexp.MustCompile(`(?i:(application|text)/(xml|.*\+xml)(;|$))`)
-	bufPool   = &sync.Pool{New: func() interface{} { return &bytes.Buffer{} }}
+	bufPool   = &sync.Pool{New: func() any { return &bytes.Buffer{} }}
 )
 
 var userAgentList = [...]string{
@@ -101,11 +100,6 @@ func (s *HeadersConf) SetConentType(value string) *HeadersConf {
 }
 
 func (s *HeadersConf) ConentType_json() *HeadersConf {
-	jsonData, err := json.Marshal(s.simpleReq.tempBody)
-	if err == nil {
-		s.simpleReq.body = bytes.NewReader([]byte("{}"))
-	}
-	s.simpleReq.body = bytes.NewReader(jsonData)
 	s.simpleReq.headers.Set(hdrContentTypeKey, jsonContentType)
 	return s
 }
@@ -118,7 +112,7 @@ func (s *HeadersConf) ConentType_charsetUtf8() *HeadersConf {
 func (s *HeadersConf) ConentType_formData() *HeadersConf {
 	//tmp := url.Values{}
 
-	//for k, v := range s.simpleReq.tempBody {
+	//for k, v := range s.simpleReq.BodyEntry {
 	//	tmp.Add(k, fmt.Sprintf("%v", v))
 	//}
 	s.simpleReq.headers.Set(hdrContentTypeKey, formDataType)

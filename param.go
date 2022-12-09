@@ -17,7 +17,7 @@ type QueryParams struct {
 }
 
 //batch settings
-func (s *QueryParams) Sets(data map[string]interface{}) *QueryParams {
+func (s *QueryParams) Sets(data map[string]any) *QueryParams {
 	for k, v := range data {
 		s.simpleReq.queryParams.Set(k, fmt.Sprintf("%v", v))
 	}
@@ -25,7 +25,7 @@ func (s *QueryParams) Sets(data map[string]interface{}) *QueryParams {
 }
 
 //single settings
-func (s *QueryParams) Set(key string, value interface{}) *QueryParams {
+func (s *QueryParams) Set(key string, value any) *QueryParams {
 	s.simpleReq.queryParams.Set(key, fmt.Sprintf("%v", value))
 	return s
 }

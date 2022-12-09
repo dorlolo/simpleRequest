@@ -26,7 +26,7 @@ func TestRequest(t *testing.T) {
 	//设置params
 	r.QueryParams().Set("user", "dorlolo")
 	//批量添加,不会覆盖上面user
-	pamarsBulid := map[string]interface{}{
+	pamarsBulid := map[string]any{
 		"passwd": "123456",
 		"action": "login",
 	}
