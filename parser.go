@@ -32,7 +32,7 @@ func (JsonParser) Unmarshal(bodyType EntryMark, BodyEntry map[string]any) io.Rea
 	case BytesEntryType:
 		return bytes.NewReader(BodyEntry[BytesEntryType.string()].([]byte))
 	case ModelEntryType:
-		jsonData, err := json.Marshal(BodyEntry)
+		jsonData, err := json.Marshal(BodyEntry[BytesEntryType.string()])
 		if err == nil {
 			return bytes.NewReader(jsonData)
 		} else {
