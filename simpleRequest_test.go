@@ -1,8 +1,8 @@
 // Package simpleRequest -----------------------------
-// @file      : simpleRequest_test.go
-// @author    : JJXu
-// @contact   : wavingBear@163.com
-// @time      : 2022/12/9 20:34:52
+// file      : simpleRequest_test.go
+// author    : JJXu
+// contact   : wavingBear@163.com
+// time      : 2022/12/9 20:34:52
 // -------------------------------------------
 package simpleRequest
 

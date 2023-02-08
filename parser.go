@@ -1,8 +1,8 @@
 // Package simpleRequest -----------------------------
-// @file      : parser.go
-// @author    : JJXu
-// @contact   : wavingBear@163.com
-// @time      : 2022/12/10 00:48:45
+// file      : parser.go
+// author    : JJXu
+// contact   : wavingBear@163.com
+// time      : 2022/12/10 00:48:45
 // -------------------------------------------
 package simpleRequest
 

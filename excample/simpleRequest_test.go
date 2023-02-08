@@ -1,8 +1,8 @@
 /*
- * @FileName:   simpleRequest_test.go
- * @Author:		JJXu
- * @CreateTime:	2022/3/3 下午11:34
- * @Description:
+ *FileName:   simpleRequest_test.go
+ *Author:		JJXu
+ *CreateTime:	2022/3/3 下午11:34
+ *Description:
  */
 
 package excample
@@ -49,7 +49,7 @@ func TestRequest(t *testing.T) {
 
 }
 
-//测试content-type 为 multipart/form-data格式的数据请求
+// 测试content-type 为 multipart/form-data格式的数据请求
 func TestAuth_fotmData(t *testing.T) {
 	req := simpleRequest.NewRequest()
 	req.Headers().ConentType_formData()
@@ -67,7 +67,7 @@ func TestAuth_fotmData(t *testing.T) {
 	t.Log(string(data))
 }
 
-//测试令牌验证
+// 测试令牌验证
 func TestAuthorization(t *testing.T) {
 	req := simpleRequest.NewRequest()
 	req.Authorization().Bearer("19f0591e-fab1-4447-90c3-1c60aef78fbd")

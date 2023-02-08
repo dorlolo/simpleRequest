@@ -1,8 +1,8 @@
 /*
- * @FileName:   simpleRequest.go
- * @Author:		JJXu
- * @CreateTime:	2022/3/2 上午12:33
- * @Description:
+ *FileName:   simpleRequest.go
+ *Author:		JJXu
+ *CreateTime:	2022/3/2 上午12:33
+ *Description:
  */
 
 package simpleRequest
@@ -84,35 +84,35 @@ type SimpleRequest struct {
 //
 //						数据准备
 
-//Authorization 添加令牌的方法集合
+// Authorization 添加令牌的方法集合
 func (s *SimpleRequest) Authorization() *Authorization {
 	return &Authorization{
 		simpleReq: s,
 	}
 }
 
-//Headers 添加请求头
+// Headers 添加请求头
 func (s *SimpleRequest) Headers() *HeadersConf {
 	return &HeadersConf{
 		simpleReq: s,
 	}
 }
 
-//Body 添加请求体
+// Body 添加请求体
 func (s *SimpleRequest) Body() *BodyConf {
 	return &BodyConf{
 		simpleReq: s,
 	}
 }
 
-//QueryParams 添加url后面的参数
+// QueryParams 添加url后面的参数
 func (s *SimpleRequest) QueryParams() *QueryParams {
 	return &QueryParams{
 		simpleReq: s,
 	}
 }
 
-//跳过证书验证
+// 跳过证书验证
 func (s *SimpleRequest) SkipCertVerify() *SimpleRequest {
 
 	s.transport = &http.Transport{
@@ -121,17 +121,17 @@ func (s *SimpleRequest) SkipCertVerify() *SimpleRequest {
 	return s
 }
 
-//设置超时时间
+// 设置超时时间
 func (s *SimpleRequest) TimeOut(t time.Duration) *SimpleRequest {
 	s.timeout = t
 	return s
 }
 
-//------------------------------------------------------
+// ------------------------------------------------------
 //
-//						发送请求
+//	发送请求
 //
-//发送postt请求
+// 发送postt请求
 func (s *SimpleRequest) do(request *http.Request) (body []byte, err error) {
 	//3. 建立http客户端
 	client := &http.Client{
@@ -202,7 +202,7 @@ func (s *SimpleRequest) GET(urls string) (body []byte, err error) {
 	return
 }
 
-//通用的请求方法
+// 通用的请求方法
 func (s *SimpleRequest) LaunchTo(urls, method string) (body []byte, err error) {
 	// body
 	s.initBody()
@@ -257,10 +257,9 @@ func (s *SimpleRequest) TRACE(url string) (body []byte, err error) {
 	return s.LaunchTo(url, http.MethodTrace)
 }
 
-//------------------------------------------------------
+// ------------------------------------------------------
 //
-//						这里数据
-//
+//	这里数据
 func (s *SimpleRequest) initBody() {
 	contentTypeData := s.headers.Get(hdrContentTypeKey)
 	switch {

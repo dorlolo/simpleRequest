@@ -1,8 +1,8 @@
 /*
- * @FileName:   utils.go
- * @Author:		JJXu
- * @CreateTime:	2022/3/29 上午11:16
- * @Description:
+ *FileName:   utils.go
+ *Author:		JJXu
+ *CreateTime:	2022/3/29 上午11:16
+ *Description:
  */
 
 package simpleRequest

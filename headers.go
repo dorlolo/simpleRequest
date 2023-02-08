@@ -1,8 +1,8 @@
 /*
- * @FileName:   header.go
- * @Author:		JJXu
- * @CreateTime:	2022/3/1 下午9:44
- * @Description:
+ *FileName:   header.go
+ *Author:		JJXu
+ *CreateTime:	2022/3/1 下午9:44
+ *Description:
  */
 
 package simpleRequest
@@ -51,7 +51,7 @@ type HeadersConf struct {
 //-------------------------------------------------------------
 // Common key settings
 
-//batch settings
+// batch settings
 func (s *HeadersConf) Sets(headers map[string]string) *HeadersConf {
 	for k, v := range headers {
 		s.simpleReq.headers.Set(k, v)
@@ -59,7 +59,7 @@ func (s *HeadersConf) Sets(headers map[string]string) *HeadersConf {
 	return s
 }
 
-//single setting
+// single setting
 func (s *HeadersConf) Set(header, value string) *HeadersConf {
 	s.simpleReq.headers.Set(header, value)
 	return s
@@ -87,13 +87,13 @@ func (s *HeadersConf) Add(header, value string) *HeadersConf {
 //-------------------------------------------------------------
 // base Key settings
 
-//SetUserAgent
+// SetUserAgent
 func (s *HeadersConf) SetUserAgent(value string) *HeadersConf {
 	s.simpleReq.headers.Set(hdrUserAgentKey, value)
 	return s
 }
 
-//SetConentType
+// SetConentType
 func (s *HeadersConf) SetConentType(value string) *HeadersConf {
 	s.simpleReq.headers.Set(hdrContentTypeKey, value)
 	return s
@@ -127,7 +127,6 @@ func (s *HeadersConf) ConentType_textPlain() *HeadersConf {
 	return s
 }
 
-//
 func (s *HeadersConf) SetConentLength(value string) *HeadersConf {
 	s.simpleReq.headers.Set(hdrContentLengthKey, value)
 	return s
@@ -141,22 +140,22 @@ func (s *HeadersConf) SetConentLocation(value string) *HeadersConf {
 	return s
 }
 
-//-------------------------------------------------------------
+// -------------------------------------------------------------
 // Extended settings
-//随机请求头的User-Agent参数
+// 随机请求头的User-Agent参数
 func (s *HeadersConf) getRandomUerAgent() string {
 	rand.Seed(time.Now().UnixNano())
 	index := rand.Intn(len(userAgentList))
 	return userAgentList[index]
 }
 
-//设置为随机 User-Agent
+// 设置为随机 User-Agent
 func (s *HeadersConf) SetRandomUerAgent() *HeadersConf {
 	s.simpleReq.headers.Set(hdrUserAgentKey, s.getRandomUerAgent())
 	return s
 }
 
-//set Authorization
+// set Authorization
 func (s *HeadersConf) SetAuthorization(value string) *HeadersConf {
 	s.simpleReq.headers.Set("Authorization", value)
 	return s

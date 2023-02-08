@@ -1,8 +1,8 @@
 /*
- * @FileName:   body.go
- * @Author:		JJXu
- * @CreateTime:	2022/3/2 上午1:23
- * @Description:
+ *FileName:   body.go
+ *Author:		JJXu
+ *CreateTime:	2022/3/2 上午1:23
+ *Description:
  */
 
 package simpleRequest
