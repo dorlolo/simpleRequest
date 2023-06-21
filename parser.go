@@ -1,4 +1,4 @@
-// Package simpleRequest -----------------------------
+// Package sRequest -----------------------------
 // file      : parser.go
 // author    : JJXu
 // contact   : wavingBear@163.com
@@ -11,6 +11,8 @@ import (
 	"encoding/json"
 	"io"
 	"mime/multipart"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -76,31 +78,55 @@ func (f *FormDataParser) Unmarshal(bodyType EntryMark, BodyEntry map[string]any)
 		}
 		body, f.ContentType = multipartCommonParse(mapper)
 	case StringEntryType:
-		f.ContentType = formDataType
 		return strings.NewReader(BodyEntry[StringEntryType.string()].(string))
 	case BytesEntryType:
-		f.ContentType = formDataType
 		return bytes.NewReader(BodyEntry[BytesEntryType.string()].([]byte))
 	default:
 		body, f.ContentType = multipartCommonParse(BodyEntry)
 	}
-	f.ContentType = formDataType
-	return nil
+	return
 }
 func multipartCommonParse(BodyEntry map[string]any) (reader io.Reader, contentType string) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	for k, sv := range BodyEntry {
-		switch sv.(type) {
-		case string:
-			strSv, _ := sv.(string)
-			_ = writer.WriteField(k, strSv)
-		case []string:
-			sss, _ := sv.([]string)
-			for _, v := range sss {
-				_ = writer.WriteField(k, v)
+		if strings.Contains(k, FormFilePathKey.string()) {
+			key := k[len(FormFilePathKey):]
+			path := sv.(string)
+			filename := filepath.Base(path)
+			filePart, _ := writer.CreateFormFile(key, filename)
+			content, err := os.ReadFile(path)
+			if err != nil {
+				panic(err)
+			}
+			_, _ = filePart.Write(content)
+		} else {
+			switch sv.(type) {
+			case string:
+				strSv, _ := sv.(string)
+				_ = writer.WriteField(k, strSv)
+			case []string:
+				sss, _ := sv.([]string)
+				for _, v := range sss {
+					_ = writer.WriteField(k, v)
+				}
+			case *multipart.FileHeader:
+				file, _ := sv.(*multipart.FileHeader)
+				filePart, _ := writer.CreateFormFile(k, file.Filename)
+				src, err := file.Open()
+				if err != nil {
+					panic(err)
+					return
+				}
+				defer src.Close()
+				_, err = io.Copy(filePart, src)
+				if err != nil {
+					panic(err)
+					return
+				}
 			}
 		}
+
 	}
 	err := writer.Close()
 	if err != nil {

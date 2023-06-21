@@ -1,4 +1,4 @@
-# simpleRequest 
+_# simpleRequest 
 ## 1. 说明
 [simpleRequest](www.github.com/dorlolo/simpleRequest) 是一款面向对象开发的http请求库。他是基于Go原生http库。开发这个模块的主要目的是为了更快的对接http协议的IOT设备。
 它具备以下特点：
@@ -179,9 +179,95 @@ modeldata:=demo{
 r.Body().SetModel(&modeldata)
 ```
 
-###  2.7 其它请求参数
+### 2.7 文件上传与转发
+### 2.7.1 文件上传
+```go
+var req = sRequest.NewRequest()
+req.Headers().ConentType_formData()
+req.Body().
+    SetFromDataFile("file", "C:\\Users\\lenovo\\Pictures\\Saved Pictures\\demo.jpg").
+    Set("fromFormat", "jpg").
+    Set("toFormat", "png")
+req.TimeOut(15 * time.Second)
+resp, err := req.POST("http://xxx/xxx")
+if err != nil {
+    fmt.Println(err.Error())
+    return
+}
+fmt.Println(string(resp))
+```
+### 2.7.2 文件转发
+下面示例中使用gin作为服务端，配合simpleRequest进行文件转发
+1. 通过multipart.FileHeader对象进行转发
+```go
+func FileForwardUseMultipartFile(c *gin.Context){
+    file,err:=c.FormFile("file")
+    
+	var req = sRequest.NewRequest()
+    req.Headers().ConentType_formData()
+    req.Body().
+        SetFromDataMultipartFile("file", file).
+        Set("fromFormat", "jpg").
+        Set("toFormat", "png")
+    req.TimeOut(15 * time.Second)
+    resp, err := req.POST("http://xxx/xxx")
+    if err != nil {
+        fmt.Println(err.Error())
+        return
+    }
+   // parse response and so on
+   // ...
+   // ...
+```
 
-#### 2.7.1 设置超时时间
+2. 在一些小众场景下，可能已经在外部构建好了body，此时也可将body转为bytes传入simpleRequest进行请求
+```go
+func FileForwardUseBytesBody(c *gin.Context){
+	file,err:=c.FormFile("file")
+	
+	// body data prepare
+    vars (
+		body = &bytes.Buffer{}
+        writer = multipart.NewWriter(body)
+    )
+	// add file object
+	filePart, _ := i.writer.CreateFormFile("file", file.Filename)
+    src, err := file.Open()
+    if err != nil {
+        fmt.Println( err.Error())
+        return
+    }
+    defer src.Close()
+    _, err = io.Copy(filePart, src)
+    if err != nil {
+        fmt.Println(err.Error())
+        return
+    }
+	// add other form data
+	writer.WriteField("fromFormat", "jpg")
+	writer.WriteField("toFormat","png")
+	
+	// post request
+	_ = writer.close()
+	var r = simpleRequest.NewRequest()
+    req.Headers().SetConentType(writer.FormDataContentType())
+    req.Body().SetBytes(body.Bytes())
+    req.TimeOut(15 * time.Second)
+    resp, err := req.POST("http://xxx/xxx")
+    if err != nil {
+        fmt.Println(err.Error())
+        return
+    }
+    // parse response and so on
+	// ...
+	// ...
+}
+
+```
+
+###  2.8 其它请求参数
+
+#### 2.8.1 设置超时时间
 ```go
 r.TimeOut(time.Second * 30)
 ```
@@ -191,8 +277,8 @@ r.TimeOut(time.Second * 30)
 r.SkipCertVerify()
 ```
 
-### 2.8 发送请求
-#### 2.8.1 post请求
+### 2.9 发送请求
+#### 2.9.1 post请求
 ```go
 res, err :=r.POST("https://127.0.0.1:80/excample")
 if err != nil {
@@ -213,17 +299,17 @@ if err != nil {
 - TRACE
 
 
-### 2.9 获取上下文
+### 2.10 获取上下文
 请注意，需要完成请求后才能获得上下文数据！
-#### 2.9.1 获取请求的上下文对象
+#### 2.10.1 获取请求的上下文对象
 ```go
 requestContext:=r.Request
 ```
 
-#### 2.9.2 获取返回的上下文对象
+#### 2.10.2 获取返回的上下文对象
 ```go
 responseContext:=r.Response
 ```
 
 ## 3. 使用示例
-[simpleRequest_test.go](excample/simpleRequest_test.go)
+[simpleRequest_test.go](excample/simpleRequest_test.go)_

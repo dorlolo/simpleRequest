@@ -7,6 +7,8 @@
 
 package simpleRequest
 
+import "mime/multipart"
+
 // EntryMark 请求体条目标记，用于标记输入的body内容格式
 type EntryMark string
 
@@ -15,10 +17,12 @@ func (b EntryMark) string() string {
 }
 
 const (
-	StringEntryType EntryMark = "__STRING_ENTRY__"
-	BytesEntryType  EntryMark = "__BYTES_ENTRY__"
-	ModelEntryType  EntryMark = "__MODEL_ENTRY__"
-	MapEntryType    EntryMark = "__MAP_ENTRY__"
+	StringEntryType    EntryMark = "__STRING_ENTRY__"
+	BytesEntryType     EntryMark = "__BYTES_ENTRY__"
+	ModelEntryType     EntryMark = "__MODEL_ENTRY__"
+	MapEntryType       EntryMark = "__MAP_ENTRY__"
+	MultipartEntryType EntryMark = "__MULTIPART_ENTRY__"
+	FormFilePathKey    EntryMark = "__FORM_FILE_PATH_KEY__"
 )
 
 type BodyConf struct {
@@ -51,5 +55,15 @@ func (s *BodyConf) SetBytes(byteData []byte) *BodyConf {
 func (s *BodyConf) SetModel(model any) *BodyConf {
 	s.simpleReq.BodyEntryMark = ModelEntryType
 	s.simpleReq.BodyEntries[ModelEntryType.string()] = model
+	return s
+}
+func (s *BodyConf) SetFromDataFile(key, filePath string) *BodyConf {
+	s.simpleReq.BodyEntryMark = MultipartEntryType
+	s.simpleReq.BodyEntries[FormFilePathKey.string()+key] = filePath
+	return s
+}
+func (s *BodyConf) SetFromDataMultipartFile(key string, multFile *multipart.FileHeader) *BodyConf {
+	s.simpleReq.BodyEntryMark = MultipartEntryType
+	s.simpleReq.BodyEntries[key] = multFile
 	return s
 }
