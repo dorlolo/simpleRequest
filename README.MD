@@ -1,10 +1,10 @@
 _# simpleRequest 
 ## 1. 说明
-[simpleRequest](www.github.com/dorlolo/simpleRequest) 是一款面向对象开发的http请求库。他是基于Go原生http库。开发这个模块的主要目的是为了更快的对接http协议的IOT设备。
+[simpleRequest](www.github.com/dorlolo/simpleRequest) 是一款面向对象开发的http请求库。他是基于Go原生http库。开发这个模块的主要目的是为了更快的对接第三方api接口。
 它具备以下特点：
 - 极简化的代码，大大提高了代码编写速度。
 - 更易于理解和使用，减少了资料查询的时间。
-- 更适合对接一些未遵循restful规范的接口。
+- 更适合对接一些不遵循restful规范的接口。
 
 这是它的一个示例:
 ```go
@@ -197,7 +197,7 @@ if err != nil {
 fmt.Println(string(resp))
 ```
 ### 2.7.2 文件转发
-下面示例中使用gin作为服务端，配合simpleRequest进行文件转发
+下面示例中使用gin作为服务端，配合simpleRequest对上传的文件进行转发
 1. 通过multipart.FileHeader对象进行转发
 ```go
 func FileForwardUseMultipartFile(c *gin.Context){
@@ -223,15 +223,15 @@ func FileForwardUseMultipartFile(c *gin.Context){
 2. 在一些小众场景下，可能已经在外部构建好了body，此时也可将body转为bytes传入simpleRequest进行请求
 ```go
 func FileForwardUseBytesBody(c *gin.Context){
-	file,err:=c.FormFile("file")
-	
-	// body data prepare
+    file,err:=c.FormFile("file")
+    
+    // body data prepare
     vars (
-		body = &bytes.Buffer{}
+        body = &bytes.Buffer{}
         writer = multipart.NewWriter(body)
     )
-	// add file object
-	filePart, _ := i.writer.CreateFormFile("file", file.Filename)
+    // add file object
+    filePart, _ := i.writer.CreateFormFile("file", file.Filename)
     src, err := file.Open()
     if err != nil {
         fmt.Println( err.Error())
@@ -243,13 +243,13 @@ func FileForwardUseBytesBody(c *gin.Context){
         fmt.Println(err.Error())
         return
     }
-	// add other form data
-	writer.WriteField("fromFormat", "jpg")
-	writer.WriteField("toFormat","png")
-	
-	// post request
-	_ = writer.close()
-	var r = simpleRequest.NewRequest()
+    // add other form data
+    writer.WriteField("fromFormat", "jpg")
+    writer.WriteField("toFormat","png")
+    
+    // post request
+    _ = writer.close()
+    var r = simpleRequest.NewRequest()
     req.Headers().SetConentType(writer.FormDataContentType())
     req.Body().SetBytes(body.Bytes())
     req.TimeOut(15 * time.Second)
@@ -259,8 +259,8 @@ func FileForwardUseBytesBody(c *gin.Context){
         return
     }
     // parse response and so on
-	// ...
-	// ...
+    // ...
+    // ...
 }
 
 ```
