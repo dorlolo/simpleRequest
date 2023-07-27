@@ -163,43 +163,12 @@ func (s *SimpleRequest) do(request *http.Request) (body []byte, err error) {
 
 // POST method does POST HTTP request. It's defined in section 2 of RFC5789.
 func (s *SimpleRequest) POST(urls string) (body []byte, err error) {
-	s.initBody()
-	r, err := http.NewRequest(http.MethodPost, urls, s.body)
-	if err != nil {
-		return nil, err
-	}
-	//headers
-	for k := range s.headers {
-		r.Header[k] = append(r.Header[k], s.headers[k]...)
-		s.headers.Del(k)
-	}
-
-	//queryParams
-	r.URL.RawQuery = s.queryParams.Encode()
-
-	body, err = s.do(r)
-
-	return
+	return s.LaunchTo(urls, http.MethodPost)
 }
 
 // GET method does GET HTTP request. It's defined in section 2 of RFC5789.
 func (s *SimpleRequest) GET(urls string) (body []byte, err error) {
-	// body
-	s.initBody()
-	r, err := http.NewRequest(http.MethodGet, urls, s.body)
-	if err != nil {
-		return nil, err
-	}
-	//headers
-	for k := range s.headers {
-		r.Header[k] = append(r.Header[k], s.headers[k]...)
-		s.headers.Del(k)
-	}
-	//queryParams
-	r.URL.RawQuery = s.queryParams.Encode()
-
-	body, err = s.do(r)
-	return
+	return s.LaunchTo(urls, http.MethodGet)
 }
 
 // 通用的请求方法
@@ -216,6 +185,19 @@ func (s *SimpleRequest) LaunchTo(urls, method string) (body []byte, err error) {
 		s.headers.Del(k)
 	}
 	//queryParams
+	if r.URL.RawQuery != "" {
+		values, err := url.ParseQuery(r.URL.RawQuery)
+		if err == nil {
+			newValues := url.Values{}
+			for k := range s.queryParams {
+				newValues.Set(k, values.Get(k))
+			}
+			for k := range s.queryParams {
+				newValues.Set(k, s.queryParams.Get(k))
+			}
+			s.queryParams = newValues
+		}
+	}
 	r.URL.RawQuery = s.queryParams.Encode()
 
 	body, err = s.do(r)
