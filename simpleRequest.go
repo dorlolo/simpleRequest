@@ -189,7 +189,7 @@ func (s *SimpleRequest) LaunchTo(urls, method string) (body []byte, err error) {
 		values, err := url.ParseQuery(r.URL.RawQuery)
 		if err == nil {
 			newValues := url.Values{}
-			for k := range s.queryParams {
+			for k := range values {
 				newValues.Set(k, values.Get(k))
 			}
 			for k := range s.queryParams {

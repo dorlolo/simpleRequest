@@ -84,3 +84,22 @@ func TestPost_withSetModel(t *testing.T) {
 		t.Log(string(result))
 	}
 }
+
+// url中的query param字符串参数会被r.QueryParams()中的key值覆盖
+func TestQueryUrl2(t *testing.T) {
+	go httpserver()
+
+	var r = NewRequest()
+	r.Headers().ConentType_formUrlencoded()
+	r.QueryParams().Set("a", "123")
+	r.QueryParams().Set("b", "456")
+	_, err := r.POST("http://localhost:8989?a=1&b=2&c=3")
+	if err != nil {
+		t.Error(err.Error())
+	} else {
+		if r.Request.URL.RawQuery != "a=123&b=456&c=3" {
+			t.Errorf("query params wangt '%s' but get '%s'", "a=123&b=456&c=3", r.Request.URL.RawQuery)
+		}
+	}
+
+}
