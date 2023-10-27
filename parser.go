@@ -9,6 +9,7 @@ package simpleRequest
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"os"
@@ -88,32 +89,45 @@ func (f *FormDataParser) Unmarshal(bodyType EntryMark, BodyEntry map[string]any)
 }
 func multipartCommonParse(BodyEntry map[string]any) (reader io.Reader, contentType string) {
 	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
+	formWriter := multipart.NewWriter(body)
 	for k, sv := range BodyEntry {
 		if strings.Contains(k, FormFilePathKey.string()) {
 			key := k[len(FormFilePathKey):]
-			path := sv.(string)
-			filename := filepath.Base(path)
-			filePart, _ := writer.CreateFormFile(key, filename)
-			content, err := os.ReadFile(path)
+			fp := sv.(string)
+			filename := filepath.Base(fp)
+			filePart, _ := formWriter.CreateFormFile(key, filename)
+			content, err := os.ReadFile(fp)
 			if err != nil {
 				panic(err)
 			}
 			_, _ = filePart.Write(content)
+
+			// way 2
+			file, err := os.Open(fp)
+			if err != nil {
+				panic(err)
+			}
+			defer file.Close()
+			fieldName := k[len(FormFilePathKey.string()):]
+			formPart, err := formWriter.CreateFormFile(fieldName, filepath.Base(fp))
+			if err != nil {
+				panic(err)
+			}
+			if _, err = io.Copy(formPart, file); err != nil {
+				return
+			}
 		} else {
-			switch sv.(type) {
+			switch multValue := sv.(type) {
 			case string:
-				strSv, _ := sv.(string)
-				_ = writer.WriteField(k, strSv)
+				_ = formWriter.WriteField(k, multValue)
 			case []string:
 				sss, _ := sv.([]string)
 				for _, v := range sss {
-					_ = writer.WriteField(k, v)
+					_ = formWriter.WriteField(k, v)
 				}
 			case *multipart.FileHeader:
-				file, _ := sv.(*multipart.FileHeader)
-				filePart, _ := writer.CreateFormFile(k, file.Filename)
-				src, err := file.Open()
+				filePart, _ := formWriter.CreateFormFile(k, multValue.Filename)
+				src, err := multValue.Open()
 				if err != nil {
 					panic(err)
 					return
@@ -124,13 +138,17 @@ func multipartCommonParse(BodyEntry map[string]any) (reader io.Reader, contentTy
 					panic(err)
 					return
 				}
+			case []byte:
+				formWriter.WriteField(k, string(multValue))
+			case int:
+				formWriter.WriteField(k, fmt.Sprintf("%v", multValue))
 			}
 		}
 
 	}
-	err := writer.Close()
+	err := formWriter.Close()
 	if err != nil {
 		panic(err)
 	}
-	return body, writer.FormDataContentType()
+	return body, formWriter.FormDataContentType()
 }

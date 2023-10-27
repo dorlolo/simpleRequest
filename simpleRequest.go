@@ -262,7 +262,7 @@ func (s *SimpleRequest) initBody() {
 		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 		fdParser := parser.(*FormDataParser)
 		s.headers.Set("Content-Type", fdParser.ContentType)
-
+		
 	case IsXMLType(contentTypeData):
 		//application/soap+xml ,application/xml
 		var parser, ok = s.bodyEntryParsers[xmlDataType]
