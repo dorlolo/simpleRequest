@@ -109,11 +109,6 @@ func (s *HeadersConf) ConentType_charsetUtf8() *HeadersConf {
 }
 
 func (s *HeadersConf) ConentType_formData() *HeadersConf {
-	//tmp := url.Values{}
-
-	//for k, v := range s.simpleReq.BodyEntry {
-	//	tmp.Add(k, fmt.Sprintf("%v", v))
-	//}
 	s.simpleReq.headers.Set(hdrContentTypeKey, formDataType)
 	return s
 }

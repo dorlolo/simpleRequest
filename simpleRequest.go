@@ -11,7 +11,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -160,7 +159,7 @@ func (s *SimpleRequest) do(request *http.Request) (body []byte, err error) {
 
 	defer resp.Body.Close()
 	//3.2 获取数据
-	body, err = ioutil.ReadAll(resp.Body)
+	body, err = io.ReadAll(resp.Body)
 	return
 }
 
@@ -288,7 +287,7 @@ func (s *SimpleRequest) initBody() {
 		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 
 	case contentTypeData == "" || strings.Contains(contentTypeData, "form-urlencoded"):
-		//默认为x-www-form-urlencoded格式
+		//default header type is "x-www-form-urlencoded"
 		var parser, ok = s.bodyEntryParsers["form-urlencoded"]
 		if !ok {
 			tmpData := url.Values{}
@@ -301,7 +300,7 @@ func (s *SimpleRequest) initBody() {
 		}
 		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 	default:
-		//todo 自动判断数据类型
+		//todo Automatically determine the data type
 		tmpData := url.Values{}
 		for k, v := range tmpData {
 			tmpData.Set(k, fmt.Sprintf("%v", v))
