@@ -15,3 +15,12 @@ func IsJSONType(ct string) bool {
 func IsXMLType(ct string) bool {
 	return xmlCheck.MatchString(ct)
 }
+
+func IsInArray(arr []string, str string) bool {
+	for _, v := range arr {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}

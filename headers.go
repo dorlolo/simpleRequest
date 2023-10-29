@@ -1,10 +1,3 @@
-/*
- *FileName:   header.go
- *Author:		JJXu
- *CreateTime:	2022/3/1 下午9:44
- *Description:
- */
-
 package simpleRequest
 
 import (
@@ -67,6 +60,12 @@ func (s *HeadersConf) Set(header, value string) *HeadersConf {
 
 func (s *HeadersConf) Add(header, value string) *HeadersConf {
 	s.simpleReq.headers.Add(header, value)
+	return s
+}
+
+// Omit Use to disable automatically generated request headers ，some like Content_Type.
+func (s *HeadersConf) Omit(keys ...string) *HeadersConf {
+	s.simpleReq.omitHeaderKeys = append(s.simpleReq.omitHeaderKeys, keys...)
 	return s
 }
 

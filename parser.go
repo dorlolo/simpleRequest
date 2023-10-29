@@ -92,30 +92,16 @@ func multipartCommonParse(BodyEntry map[string]any) (reader io.Reader, contentTy
 	formWriter := multipart.NewWriter(body)
 	for k, sv := range BodyEntry {
 		if strings.Contains(k, FormFilePathKey.string()) {
-			key := k[len(FormFilePathKey):]
+			fieldName := k[len(FormFilePathKey):]
 			fp := sv.(string)
 			filename := filepath.Base(fp)
-			filePart, _ := formWriter.CreateFormFile(key, filename)
+			//way1
+			filePart, _ := formWriter.CreateFormFile(fieldName, filename)
 			content, err := os.ReadFile(fp)
 			if err != nil {
 				panic(err)
 			}
 			_, _ = filePart.Write(content)
-
-			// way 2
-			file, err := os.Open(fp)
-			if err != nil {
-				panic(err)
-			}
-			defer file.Close()
-			fieldName := k[len(FormFilePathKey.string()):]
-			formPart, err := formWriter.CreateFormFile(fieldName, filepath.Base(fp))
-			if err != nil {
-				panic(err)
-			}
-			if _, err = io.Copy(formPart, file); err != nil {
-				return
-			}
 		} else {
 			switch multValue := sv.(type) {
 			case string:

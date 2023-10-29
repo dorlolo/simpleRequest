@@ -42,11 +42,12 @@ func NewRequest(opts ...OPTION) *SimpleRequest {
 }
 
 type SimpleRequest struct {
-	url         string
-	queryParams url.Values
-	body        io.Reader
-	headers     http.Header
-	transport   *http.Transport
+	url            string
+	queryParams    url.Values
+	body           io.Reader
+	headers        http.Header
+	omitHeaderKeys []string
+	transport      *http.Transport
 
 	BodyEntryMark    EntryMark
 	BodyEntries      map[string]any
@@ -182,9 +183,13 @@ func (s *SimpleRequest) LaunchTo(urls, method string) (body []byte, err error) {
 		return nil, err
 	}
 	//headers
-	for k := range s.headers {
-		r.Header[k] = append(r.Header[k], s.headers[k]...)
-		s.headers.Del(k)
+	//for k := range s.headers {
+	//	r.Header[k] = append(r.Header[k], s.headers[k]...)
+	//	s.headers.Del(k)
+	//}
+	r.Header = s.headers
+	for _, k := range s.omitHeaderKeys {
+		r.Header.Del(k)
 	}
 	//queryParams
 	if r.URL.RawQuery != "" {
@@ -262,7 +267,7 @@ func (s *SimpleRequest) initBody() {
 		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 		fdParser := parser.(*FormDataParser)
 		s.headers.Set("Content-Type", fdParser.ContentType)
-		
+
 	case IsXMLType(contentTypeData):
 		//application/soap+xml ,application/xml
 		var parser, ok = s.bodyEntryParsers[xmlDataType]
