@@ -101,6 +101,12 @@ r.Headers().ConentType_textPlain()
 //r.Headers().Set("Content-Type","text/plain; charset=utf-8")
 ```
 
+#### 2.4.5 忽略指定请求头
+在默认情况下，`Content-Type`将被自动添加到请求头中，但对于某些场景来说这会导致请求失败。使用下面的方法可以忽略指定的请求头
+```go
+r.Headers().Omit("Content-Type")
+```
+
 ### 2.5 添加queryParams
 #### 2.5.1 单个赋值
 ```go

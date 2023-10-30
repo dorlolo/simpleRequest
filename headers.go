@@ -69,7 +69,7 @@ func (s *HeadersConf) Omit(keys ...string) *HeadersConf {
 	return s
 }
 
-//一般用不到
+//deprecated
 //func (s *HeadersConf) Values(keys string) *HeadersConf {
 //	s.simpleReq.headers.Values(keys)
 //	return s
