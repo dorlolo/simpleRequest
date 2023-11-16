@@ -7,7 +7,9 @@
 
 package simpleRequest
 
-import "mime/multipart"
+import (
+	"mime/multipart"
+)
 
 // EntryMark 请求体条目标记，用于标记输入的body内容格式
 type EntryMark string
@@ -60,10 +62,16 @@ func (s *BodyConf) SetModel(model any) *BodyConf {
 func (s *BodyConf) SetFromDataFile(key, filePath string) *BodyConf {
 	s.simpleReq.BodyEntryMark = MultipartEntryType
 	s.simpleReq.BodyEntries[FormFilePathKey.string()+key] = filePath
+	if s.simpleReq.headers.Get(hdrContentTypeKey) == "" {
+		s.simpleReq.headers.Set(hdrContentTypeKey, formDataType)
+	}
 	return s
 }
 func (s *BodyConf) SetFromDataMultipartFile(key string, multFile *multipart.FileHeader) *BodyConf {
 	s.simpleReq.BodyEntryMark = MultipartEntryType
 	s.simpleReq.BodyEntries[key] = multFile
+	if s.simpleReq.headers.Get(hdrContentTypeKey) == "" {
+		s.simpleReq.headers.Set(hdrContentTypeKey, formDataType)
+	}
 	return s
 }
