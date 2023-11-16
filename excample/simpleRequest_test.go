@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/dorlolo/simpleRequest"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -133,6 +134,7 @@ func TestTextPlain(t *testing.T) {
 
 }
 
+// 阿里云Oss文件上传示例
 func TestUploadFileToOss(t *testing.T) {
 	var signedUrl = ""    //STS授权url
 	var xOssCallback = "" //回调信息
@@ -140,9 +142,11 @@ func TestUploadFileToOss(t *testing.T) {
 	req.Headers().
 		Sets(map[string]string{
 			"X-Oss-Callback": xOssCallback,
-		}).
-		Omit("Content-Type") //oss默认不支持传Content-Type，需要忽略掉。或者可以在oss控制台上放行这个请求头
-	req.Body().SetFromDataFile("file", "./CHANGELOG.MD")
+		})
+
+	fileData, err := os.ReadFile("./CHANGELOG.MD")
+	req.Body().SetBytes(fileData)
+
 	body, err := req.PUT(signedUrl)
 	if err != nil {
 		t.Error(err)

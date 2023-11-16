@@ -8,6 +8,7 @@
 package simpleRequest
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"io"
@@ -285,6 +286,9 @@ func (s *SimpleRequest) initBody() {
 			return
 		}
 		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
+
+	case contentTypeData == "" && s.BodyEntryMark == BytesEntryType:
+		s.body = bytes.NewReader(s.BodyEntries[BytesEntryType.string()].([]byte))
 
 	case contentTypeData == "" || strings.Contains(contentTypeData, "form-urlencoded"):
 		//default header type is "x-www-form-urlencoded"
