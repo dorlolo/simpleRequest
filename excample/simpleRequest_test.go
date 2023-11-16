@@ -132,3 +132,21 @@ func TestTextPlain(t *testing.T) {
 	}
 
 }
+
+func TestUploadFileToOss(t *testing.T) {
+	var signedUrl = ""    //STS授权url
+	var xOssCallback = "" //回调信息
+	var req = simpleRequest.NewRequest()
+	req.Headers().
+		Sets(map[string]string{
+			"X-Oss-Callback": xOssCallback,
+		}).
+		Omit("Content-Type") //oss默认不支持传Content-Type，需要忽略掉。或者可以在oss控制台上放行这个请求头
+	req.Body().SetFromDataFile("file", "./CHANGELOG.MD")
+	body, err := req.PUT(signedUrl)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	fmt.Println(string(body))
+}
