@@ -59,6 +59,8 @@ func (s *BodyConf) SetModel(model any) *BodyConf {
 	s.simpleReq.BodyEntries[ModelEntryType.string()] = model
 	return s
 }
+
+// 添加上传文件
 func (s *BodyConf) SetFromDataFile(key, filePath string) *BodyConf {
 	s.simpleReq.BodyEntryMark = MultipartEntryType
 	s.simpleReq.BodyEntries[FormFilePathKey.string()+key] = filePath
@@ -67,6 +69,8 @@ func (s *BodyConf) SetFromDataFile(key, filePath string) *BodyConf {
 	}
 	return s
 }
+
+// 添加文件，适用于服务端文件转发场景，比如直接从c.FormFile("file")中获取FileHeader对象转发即可
 func (s *BodyConf) SetFromDataMultipartFile(key string, multFile *multipart.FileHeader) *BodyConf {
 	s.simpleReq.BodyEntryMark = MultipartEntryType
 	s.simpleReq.BodyEntries[key] = multFile
