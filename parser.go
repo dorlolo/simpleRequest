@@ -9,6 +9,7 @@ package simpleRequest
 import (
 	"bytes"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -17,9 +18,11 @@ import (
 	"strings"
 )
 
+// 通用类型解析器
 var bodyEntryParsers = map[string]IBodyEntryParser{
 	jsonContentType: new(JsonParser),
 	formDataType:    new(FormDataParser),
+	xmlDataType:     new(XmlParser),
 }
 
 type IBodyEntryParser interface {
@@ -137,4 +140,31 @@ func multipartCommonParse(BodyEntry map[string]any) (reader io.Reader, contentTy
 		panic(err)
 	}
 	return body, formWriter.FormDataContentType()
+}
+
+type XmlParser struct{}
+
+func (f XmlParser) Unmarshal(bodyType EntryMark, BodyEntry map[string]any) (body io.Reader) {
+	switch bodyType {
+	case MapEntryType:
+		xmlData, err := xml.Marshal(BodyEntry[bodyType.string()])
+		if err == nil {
+			return bytes.NewReader(xmlData)
+		} else {
+			return strings.NewReader("")
+		}
+	case ModelEntryType:
+		xmlData, err := xml.Marshal(BodyEntry[bodyType.string()])
+		if err == nil {
+			return bytes.NewReader(xmlData)
+		} else {
+			return strings.NewReader("")
+		}
+	case StringEntryType:
+		return strings.NewReader(BodyEntry[StringEntryType.string()].(string))
+	case BytesEntryType:
+		return bytes.NewReader(BodyEntry[BytesEntryType.string()].([]byte))
+	default:
+		return strings.NewReader("")
+	}
 }

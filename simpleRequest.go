@@ -251,64 +251,90 @@ func (s *SimpleRequest) TRACE(url string) (body []byte, err error) {
 //	这里数据
 func (s *SimpleRequest) initBody() {
 	contentTypeData := s.headers.Get(hdrContentTypeKey)
-	switch {
-	case IsJSONType(contentTypeData):
-		var parser, ok = s.bodyEntryParsers[jsonContentType]
-		if !ok {
-			parser = new(JsonParser)
-		}
-		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
+	if contentTypeData != "" {
+		switch {
+		case IsJSONType(contentTypeData):
+			var parser, ok = s.bodyEntryParsers[jsonContentType]
+			if !ok {
+				parser = new(JsonParser)
+			}
+			s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 
-	case strings.Contains(contentTypeData, formDataType):
-		var parser, ok = s.bodyEntryParsers[formDataType]
-		if !ok {
-			parser = new(FormDataParser)
-		}
-		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
-		fdParser := parser.(*FormDataParser)
-		s.headers.Set("Content-Type", fdParser.ContentType)
+		case strings.Contains(contentTypeData, formDataType):
+			var parser, ok = s.bodyEntryParsers[formDataType]
+			if !ok {
+				parser = new(FormDataParser)
+			}
+			s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
+			fdParser := parser.(*FormDataParser)
+			s.headers.Set("Content-Type", fdParser.ContentType)
 
-	case IsXMLType(contentTypeData):
-		//application/soap+xml ,application/xml
-		var parser, ok = s.bodyEntryParsers[xmlDataType]
-		if !ok {
-			data, _ := s.BodyEntries[StringEntryType.string()].(string)
-			s.body = strings.NewReader(data)
-			return
-		}
-		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
+		case IsXMLType(contentTypeData):
+			//application/soap+xml ,application/xml
+			var parser, ok = s.bodyEntryParsers[xmlDataType]
+			if !ok {
+				data, _ := s.BodyEntries[StringEntryType.string()].(string)
+				s.body = strings.NewReader(data)
+				return
+			}
+			s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 
-	case strings.Contains(contentTypeData, "text") || strings.Contains(contentTypeData, javaScriptType):
-		var parser, ok = s.bodyEntryParsers[textPlainType]
-		if !ok {
-			data, _ := s.BodyEntries[StringEntryType.string()].(string)
-			s.body = strings.NewReader(data)
-			return
-		}
-		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
+		case strings.Contains(contentTypeData, "text") || strings.Contains(contentTypeData, javaScriptType):
+			var parser, ok = s.bodyEntryParsers[textPlainType]
+			if !ok {
+				data, _ := s.BodyEntries[StringEntryType.string()].(string)
+				s.body = strings.NewReader(data)
+				return
+			}
+			s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 
-	case contentTypeData == "" && s.BodyEntryMark == BytesEntryType:
-		s.body = bytes.NewReader(s.BodyEntries[BytesEntryType.string()].([]byte))
-
-	case contentTypeData == "" || strings.Contains(contentTypeData, "form-urlencoded"):
-		//default header type is "x-www-form-urlencoded"
-		var parser, ok = s.bodyEntryParsers["form-urlencoded"]
-		if !ok {
+		case strings.Contains(contentTypeData, "form-urlencoded"):
+			//default header type is "x-www-form-urlencoded"
+			var parser, ok = s.bodyEntryParsers["form-urlencoded"]
+			if !ok {
+				tmpData := url.Values{}
+				for k, v := range s.BodyEntries {
+					tmpData.Set(k, fmt.Sprintf("%v", v))
+				}
+				s.body = strings.NewReader(tmpData.Encode())
+				s.Headers().ConentType_formUrlencoded()
+				return
+			}
+			s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
+		default:
+			//todo Automatically determine the data type
 			tmpData := url.Values{}
-			for k, v := range s.BodyEntries {
+			for k, v := range tmpData {
+				if strings.HasPrefix(k, FormFilePathKey.string()) {
+					k = k[len(FormFilePathKey):]
+				}
 				tmpData.Set(k, fmt.Sprintf("%v", v))
 			}
 			s.body = strings.NewReader(tmpData.Encode())
-			s.Headers().ConentType_formUrlencoded()
-			return
 		}
-		s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
-	default:
-		//todo Automatically determine the data type
-		tmpData := url.Values{}
-		for k, v := range tmpData {
-			tmpData.Set(k, fmt.Sprintf("%v", v))
+	} else {
+		switch s.BodyEntryMark {
+		case BytesEntryType:
+			s.body = bytes.NewReader(s.BodyEntries[BytesEntryType.string()].([]byte))
+		case StringEntryType:
+			s.body = strings.NewReader(s.BodyEntries[BytesEntryType.string()].(string))
+		default:
+			var parser, ok = s.bodyEntryParsers["form-urlencoded"]
+			if !ok {
+				tmpData := url.Values{}
+				for k, v := range s.BodyEntries {
+					if strings.HasPrefix(k, FormFilePathKey.string()) {
+						k = k[len(FormFilePathKey):]
+					}
+					tmpData.Set(k, fmt.Sprintf("%v", v))
+				}
+				s.body = strings.NewReader(tmpData.Encode())
+				s.Headers().ConentType_formUrlencoded()
+				return
+			}
+			s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 		}
-		s.body = strings.NewReader(tmpData.Encode())
+
 	}
+
 }
