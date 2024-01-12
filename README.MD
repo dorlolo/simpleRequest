@@ -1,10 +1,11 @@
-_# simpleRequest 
+# simpleRequest 
 ## 1. 说明
-[simpleRequest](www.github.com/dorlolo/simpleRequest) 是一款面向对象开发的http请求库。他是基于Go原生http库。开发这个模块的主要目的是为了更快的对接第三方api接口。
-它具备以下特点：
-- 极简化的代码，大大提高了代码编写速度。
-- 更易于理解和使用，减少了资料查询的时间。
-- 更适合对接一些不遵循restful规范的接口。
+[simpleRequest](www.github.com/dorlolo/simpleRequest) 是一款面向对象的http请求库，它在Go原生的http库为基础做了一定的封装，使开发更加便捷。
+
+> [simpleRequest](www.github.com/dorlolo/simpleRequest) 具备以下特点：
+- 没有在代码层面遵循restful规范，适合对接不符合规范的接口;
+- 轻量级、不需要繁琐的配置;
+- 易于理解和使用，减少了资料查询的时间。
 
 这是它的一个示例:
 ```go
@@ -325,4 +326,4 @@ responseContext:=r.Response
 ```
 
 ## 3. 使用示例
-[simpleRequest_test.go](excample/simpleRequest_test.go)_
+[simpleRequest_test.go](excample/simpleRequest_test.go)
