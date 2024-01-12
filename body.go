@@ -8,7 +8,10 @@
 package simpleRequest
 
 import (
+	"bytes"
+	"io"
 	"mime/multipart"
+	"strings"
 )
 
 // EntryMark 请求体条目标记，用于标记输入的body内容格式
@@ -26,6 +29,21 @@ const (
 	MultipartEntryType EntryMark = "__MULTIPART_ENTRY__"
 	FormFilePathKey    EntryMark = "__FORM_FILE_PATH_KEY__"
 )
+
+func GetStringEntryTypeBody(bodyEntries map[string]any) io.Reader {
+	data, ok := bodyEntries[StringEntryType.string()]
+	if !ok || data == nil {
+		return nil
+	}
+	return strings.NewReader(data.(string))
+}
+func GetBytesEntryTypeBody(bodyEntries map[string]any) io.Reader {
+	data, ok := bodyEntries[BytesEntryType.string()]
+	if !ok || data == "" {
+		return nil
+	}
+	return bytes.NewReader(data.([]byte))
+}
 
 type BodyConf struct {
 	simpleReq *SimpleRequest

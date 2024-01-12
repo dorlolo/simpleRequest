@@ -101,11 +101,15 @@ r.Headers().ConentType_textPlain()
 //r.Headers().Set("Content-Type","text/plain; charset=utf-8")
 ```
 
-#### 2.4.5 忽略指定请求头
-在默认情况下，`Content-Type`将被自动添加到请求头中，但对于某些场景来说这会导致请求失败。使用下面的方法可以忽略指定的请求头
+#### 2.4.5 忽略指定请求头/禁用默认content-Type
+在默认情况下，`Content-Type`将被自动添加到请求头中，值为`application/x-www-form-urlencoded`。但对于某些场景来说这会导致请求失败。使用下面的方法可以忽略指定的请求头
 ```go
 r.Headers().Omit("Content-Type")
 ```
+或者使用以下方法禁用**默认content-Type**。禁用后当你不主动设置`Content-Type`时，请求头中将不会包含`Content-Type`。
+```go
+var r = simpleRequest.NewRequest(simpleRequest.OptionDisableDefaultContentType())
+````
 
 ### 2.5 添加queryParams
 #### 2.5.1 单个赋值
@@ -311,7 +315,10 @@ if err != nil {
 ```go
 requestContext:=r.Request
 ```
-
+为了让用户能够便于分析调试，在进行http请求后r.Request.Body中的数据仍旧可读，但是会丧失部分性能，如果要禁用此功能请使用以下方法。
+```go
+var r = simpleRequest.NewRequest(simpleRequest.OptionDisableDefaultContentType())
+```
 #### 2.10.2 获取返回的上下文对象
 ```go
 responseContext:=r.Response

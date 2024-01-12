@@ -10,6 +10,7 @@ package simpleRequest
 import (
 	"bytes"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -49,14 +50,16 @@ type SimpleRequest struct {
 	omitHeaderKeys []string
 	transport      *http.Transport
 
-	BodyEntryMark    EntryMark
-	BodyEntries      map[string]any
-	bodyEntryParsers map[string]IBodyEntryParser
+	BodyEntryMark             EntryMark                   // 用于标记输入的body内容格式
+	BodyEntries               map[string]any              // 输入的body中的内容
+	bodyEntryParsers          map[string]IBodyEntryParser // 用于将BodyEntries中的内容解析后传入request body中
+	disableDefaultContentType bool                        // 禁用默认的ContentType
+	disableCopyRequestBody    bool                        // 禁用默认的ContentType，在进行http请求后SimpleRequest.Request.Body中内容会无法读取
 
 	timeout time.Duration
 
-	Response http.Response //用于获取完整的返回内容。请注意要在请求之后才能获取
-	Request  http.Request  //用于获取完整的请求内容。请注意要在请求之后才能获取
+	Response *http.Response //用于获取完整的返回内容。请注意要在请求之后才能获取
+	Request  *http.Request  //用于获取完整的请求内容。请注意要在请求之后才能获取
 	//cookies           map[string]string
 	//data              any
 	//cli               *http.Client
@@ -144,23 +147,17 @@ func (s *SimpleRequest) do(request *http.Request) (body []byte, err error) {
 	//3.1 发送数据
 	resp, err := client.Do(request)
 	if err != nil {
-		fmt.Println("【Request Error】:", err.Error())
+		err = errors.New("[client.Do Err]:" + err.Error())
 		return
 	}
 
 	//v0.0.2更新，将request和response内容返回，便于用户进行分析 JJXu 03-11-2022
+	s.Request = request
 	if resp != nil {
-		s.Response = *resp
-	} else {
-		return
+		s.Response = resp
+		defer resp.Body.Close()
+		body, err = io.ReadAll(resp.Body)
 	}
-	if request != nil {
-		s.Request = *request
-	}
-
-	defer resp.Body.Close()
-	//3.2 获取数据
-	body, err = io.ReadAll(resp.Body)
 	return
 }
 
@@ -178,15 +175,27 @@ func (s *SimpleRequest) GET(urls string) (body []byte, err error) {
 func (s *SimpleRequest) LaunchTo(urls, method string) (body []byte, err error) {
 	// body
 	s.initBody()
-	r, err := http.NewRequest(method, urls, s.body)
+	var r *http.Request
+	copBody, err := io.ReadAll(s.body)
 	if err != nil {
-		return nil, err
+		return
+	}
+	if !s.disableCopyRequestBody {
+		// 使r.body在请求后仍旧可读,便于使用者对请求过程进行分析
+		r, err = http.NewRequest(method, urls, io.NopCloser(bytes.NewBuffer(copBody)))
+		if err != nil {
+			return nil, err
+		}
+		defer func() {
+			r.Body = io.NopCloser(bytes.NewBuffer(copBody))
+		}()
+	} else {
+		r, err = http.NewRequest(method, urls, s.body)
+		if err != nil {
+			return nil, err
+		}
 	}
 	//headers
-	//for k := range s.headers {
-	//	r.Header[k] = append(r.Header[k], s.headers[k]...)
-	//	s.headers.Del(k)
-	//}
 	r.Header = s.headers
 	for _, k := range s.omitHeaderKeys {
 		r.Header.Del(k)
@@ -248,7 +257,7 @@ func (s *SimpleRequest) TRACE(url string) (body []byte, err error) {
 
 // ------------------------------------------------------
 //
-//	这里数据
+//	Automatically parses the request body based on the content-type type defined in the request header
 func (s *SimpleRequest) initBody() {
 	contentTypeData := s.headers.Get(hdrContentTypeKey)
 	if contentTypeData != "" {
@@ -273,8 +282,7 @@ func (s *SimpleRequest) initBody() {
 			//application/soap+xml ,application/xml
 			var parser, ok = s.bodyEntryParsers[xmlDataType]
 			if !ok {
-				data, _ := s.BodyEntries[StringEntryType.string()].(string)
-				s.body = strings.NewReader(data)
+				s.body = GetStringEntryTypeBody(s.BodyEntries)
 				return
 			}
 			s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
@@ -282,8 +290,7 @@ func (s *SimpleRequest) initBody() {
 		case strings.Contains(contentTypeData, "text") || strings.Contains(contentTypeData, javaScriptType):
 			var parser, ok = s.bodyEntryParsers[textPlainType]
 			if !ok {
-				data, _ := s.BodyEntries[StringEntryType.string()].(string)
-				s.body = strings.NewReader(data)
+				s.body = GetStringEntryTypeBody(s.BodyEntries)
 				return
 			}
 			s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
@@ -292,32 +299,40 @@ func (s *SimpleRequest) initBody() {
 			//default header type is "x-www-form-urlencoded"
 			var parser, ok = s.bodyEntryParsers["form-urlencoded"]
 			if !ok {
-				tmpData := url.Values{}
 				for k, v := range s.BodyEntries {
-					tmpData.Set(k, fmt.Sprintf("%v", v))
+					if v == nil {
+						break
+					}
+					switch k {
+					case StringEntryType.string():
+						s.body = GetStringEntryTypeBody(s.BodyEntries)
+						break
+					case BytesEntryType.string():
+						s.body = GetBytesEntryTypeBody(s.BodyEntries)
+						break
+					default:
+						tmpData := url.Values{}
+						if strings.HasPrefix(k, FormFilePathKey.string()) {
+							k = k[len(FormFilePathKey):]
+						}
+						tmpData.Set(k, fmt.Sprintf("%v", v))
+						s.body = strings.NewReader(tmpData.Encode())
+					}
 				}
-				s.body = strings.NewReader(tmpData.Encode())
-				s.Headers().ConentType_formUrlencoded()
+				//s.Headers().ConentType_formUrlencoded()
 				return
 			}
 			s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)
 		default:
-			//todo Automatically determine the data type
-			tmpData := url.Values{}
-			for k, v := range tmpData {
-				if strings.HasPrefix(k, FormFilePathKey.string()) {
-					k = k[len(FormFilePathKey):]
-				}
-				tmpData.Set(k, fmt.Sprintf("%v", v))
-			}
-			s.body = strings.NewReader(tmpData.Encode())
+			// 自动处理body数据
+			s.body = new(CommonParser).Unmarshal(s.BodyEntryMark, s.BodyEntries)
 		}
 	} else {
 		switch s.BodyEntryMark {
 		case BytesEntryType:
-			s.body = bytes.NewReader(s.BodyEntries[BytesEntryType.string()].([]byte))
+			s.body = GetBytesEntryTypeBody(s.BodyEntries)
 		case StringEntryType:
-			s.body = strings.NewReader(s.BodyEntries[BytesEntryType.string()].(string))
+			s.body = GetStringEntryTypeBody(s.BodyEntries)
 		default:
 			var parser, ok = s.bodyEntryParsers["form-urlencoded"]
 			if !ok {
@@ -329,7 +344,9 @@ func (s *SimpleRequest) initBody() {
 					tmpData.Set(k, fmt.Sprintf("%v", v))
 				}
 				s.body = strings.NewReader(tmpData.Encode())
-				s.Headers().ConentType_formUrlencoded()
+				if !s.disableDefaultContentType {
+					s.Headers().ConentType_formUrlencoded()
+				}
 				return
 			}
 			s.body = parser.Unmarshal(s.BodyEntryMark, s.BodyEntries)

@@ -8,7 +8,6 @@ package simpleRequest
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"testing"
@@ -35,7 +34,7 @@ func httpserver() {
 			io.WriteString(w, "false")
 		}
 	})
-	fmt.Println("http服务启动了")
+	//fmt.Println("http服务启动了")
 	http.ListenAndServe(":8989", nil)
 }
 
@@ -98,8 +97,64 @@ func TestQueryUrl2(t *testing.T) {
 		t.Error(err.Error())
 	} else {
 		if r.Request.URL.RawQuery != "a=123&b=456&c=3" {
-			t.Errorf("query params wangt '%s' but get '%s'", "a=123&b=456&c=3", r.Request.URL.RawQuery)
+			t.Errorf("query params want '%s' but get '%s'", "a=123&b=456&c=3", r.Request.URL.RawQuery)
 		}
 	}
 
+}
+
+// 请求后，r.Request.Body中的内容仍旧可读
+func TestQueryUseStringBody(t *testing.T) {
+	go httpserver()
+	var r = NewRequest()
+	r.Headers().ConentType_json()
+	bodyData := "{'a'=123,'b'=56}"
+	r.Body().SetString(bodyData)
+	_, err := r.POST("http://localhost:8989")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	body, err := io.ReadAll(r.Request.Body)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if string(body) != bodyData {
+		t.Errorf("request body want '%s' but get '%s'", bodyData, body)
+	}
+}
+
+func TestEmptyBody(t *testing.T) {
+	go httpserver()
+	var r = NewRequest()
+	r.Headers().ConentType_json()
+	_, err := r.POST("http://localhost:8989")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	body, err := io.ReadAll(r.Request.Body)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if string(body) != "{}" {
+		t.Errorf("request body want '%s' but get '%s'", "{}", body)
+	}
+
+	r.Headers().ConentType_formUrlencoded()
+	_, err = r.POST("http://localhost:8989")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	body, err = io.ReadAll(r.Request.Body)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if string(body) != "" {
+		t.Errorf("request body want '%s' but get '%s'", "", body)
+	}
 }

@@ -15,3 +15,20 @@ func OptionNewBodyEntryParser(contentType string, parser IBodyEntryParser) OPTIO
 		return r
 	}
 }
+
+// OptionDisableDefaultContentType 禁用默认的ContentType
+// 当未指定ContentType时，将不会使用默认的ContentType
+func OptionDisableDefaultContentType() OPTION {
+	return func(r *SimpleRequest) *SimpleRequest {
+		r.disableDefaultContentType = true
+		return r
+	}
+}
+
+// OptionDisableCopyRequestBody 禁用复制RequestBody
+func OptionDisableCopyRequestBody() OPTION {
+	return func(r *SimpleRequest) *SimpleRequest {
+		r.disableCopyRequestBody = true
+		return r
+	}
+}

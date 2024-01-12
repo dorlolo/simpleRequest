@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -34,9 +35,9 @@ type JsonParser struct{}
 func (JsonParser) Unmarshal(bodyType EntryMark, BodyEntry map[string]any) io.Reader {
 	switch bodyType {
 	case StringEntryType:
-		return strings.NewReader(BodyEntry[StringEntryType.string()].(string))
+		return GetStringEntryTypeBody(BodyEntry)
 	case BytesEntryType:
-		return bytes.NewReader(BodyEntry[BytesEntryType.string()].([]byte))
+		return GetBytesEntryTypeBody(BodyEntry)
 	case ModelEntryType:
 		jsonData, err := json.Marshal(BodyEntry[ModelEntryType.string()])
 		if err == nil {
@@ -82,9 +83,9 @@ func (f *FormDataParser) Unmarshal(bodyType EntryMark, BodyEntry map[string]any)
 		}
 		body, f.ContentType = multipartCommonParse(mapper)
 	case StringEntryType:
-		return strings.NewReader(BodyEntry[StringEntryType.string()].(string))
+		return GetStringEntryTypeBody(BodyEntry)
 	case BytesEntryType:
-		return bytes.NewReader(BodyEntry[BytesEntryType.string()].([]byte))
+		return GetBytesEntryTypeBody(BodyEntry)
 	default:
 		body, f.ContentType = multipartCommonParse(BodyEntry)
 	}
@@ -161,10 +162,34 @@ func (f XmlParser) Unmarshal(bodyType EntryMark, BodyEntry map[string]any) (body
 			return strings.NewReader("")
 		}
 	case StringEntryType:
-		return strings.NewReader(BodyEntry[StringEntryType.string()].(string))
+		return GetStringEntryTypeBody(BodyEntry)
 	case BytesEntryType:
-		return bytes.NewReader(BodyEntry[BytesEntryType.string()].([]byte))
+		return GetBytesEntryTypeBody(BodyEntry)
 	default:
 		return strings.NewReader("")
 	}
+}
+
+type CommonParser struct {
+}
+
+func (f CommonParser) Unmarshal(bodyType EntryMark, BodyEntry map[string]any) (body io.Reader) {
+	tmpData := url.Values{}
+	for k, v := range BodyEntry {
+		switch k {
+		case StringEntryType.string():
+			body = GetStringEntryTypeBody(BodyEntry)
+			break
+		case BytesEntryType.string():
+			body = GetBytesEntryTypeBody(BodyEntry)
+			break
+		default:
+			if strings.HasPrefix(k, FormFilePathKey.string()) {
+				k = k[len(FormFilePathKey):]
+			}
+			tmpData.Set(k, fmt.Sprintf("%v", v))
+		}
+	}
+	body = strings.NewReader(tmpData.Encode())
+	return
 }
