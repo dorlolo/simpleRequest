@@ -242,7 +242,7 @@ func FileForwardUseBytesBody(c *gin.Context){
         writer = multipart.NewWriter(body)
     )
     // add file object
-    filePart, _ := i.writer.CreateFormFile("file", file.Filename)
+    filePart, _ := writer.CreateFormFile("file", file.Filename)
     src, err := file.Open()
     if err != nil {
         fmt.Println( err.Error())
