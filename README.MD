@@ -62,12 +62,13 @@ r.Headers().Set("token", "d+jfdji*D%1=").Set("Content-Type", "application/json")
 ```
 
 #### 2.4.4 添加多值
-对单个key添加多只不要使用`.set`,因为原先的值会被覆盖
+
 ```go
+// 对相同key的值进行覆盖，请使用Set方法
 r.Headers().Set("Accept", "text/html")
+// 对相同key的值进行追加，请使用Add方法
 r.Headers().Add("Accept","application/xhtml+xml")
 r.Headers().Add("Accept","application/xml;q=0.8")
-r.Headers().Add("Accept","image/webp")
 r.Headers().Add("Accept","*/*;q=0.8")
 ```
 
