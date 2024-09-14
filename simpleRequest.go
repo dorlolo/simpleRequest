@@ -54,7 +54,7 @@ type SimpleRequest struct {
 	BodyEntries               map[string]any              // 输入的body中的内容
 	bodyEntryParsers          map[string]IBodyEntryParser // 用于将BodyEntries中的内容解析后传入request body中
 	disableDefaultContentType bool                        // 禁用默认的ContentType
-	disableCopyRequestBody    bool                        // 禁用默认的ContentType，在进行http请求后SimpleRequest.Request.Body中内容会无法读取
+	disableCopyRequestBody    bool                        // 禁用复制请求体，在进行http请求后SimpleRequest.Request.Body中内容会无法读取，但是会提高性能
 
 	timeout time.Duration
 
@@ -173,12 +173,15 @@ func (s *SimpleRequest) GET(urls string) (body []byte, err error) {
 
 // 通用的请求方法
 func (s *SimpleRequest) LaunchTo(urls, method string) (body []byte, err error) {
+	var r *http.Request
 	// body
 	s.initBody()
-	var r *http.Request
-	copBody, err := io.ReadAll(s.body)
-	if err != nil {
-		return
+	var copBody []byte
+	if s.body != nil {
+		copBody, err = io.ReadAll(s.body)
+		if err != nil {
+			return
+		}
 	}
 	if !s.disableCopyRequestBody {
 		// 使r.body在请求后仍旧可读,便于使用者对请求过程进行分析
